@@ -1,0 +1,8 @@
+.idea/
+archives/
+config*.yaml
+*.txt
+*.png
+log
+TODO
+
