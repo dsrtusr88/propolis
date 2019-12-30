@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	internalRule = "internal"
+	internalRule = " -- "
 )
 
 var (
@@ -32,7 +32,9 @@ func main() {
 		return
 	}
 
-	release := music.New(cli.path)
+	// by default, metadata (spectrograms, etc), will be put in a side folder.
+	metadataDir := cli.path + " (Metadata)"
+	release := music.NewWithExternalMetadata(cli.path, metadataDir)
 
 	logthis.Info("Checking Path is a music release", logthis.NORMAL)
 	err := release.ParseFiles()
@@ -69,10 +71,17 @@ func main() {
 	// flac is small caps
 	// 2.3.20. Leading spaces are not allowed in any file or folder names + leading dots
 	logthis.Info("Checking extra files", logthis.NORMAL)
+	if err := CheckExtraFiles(release); err != nil {
+		log.BadResult(err == nil, internalRule, "", "Critical error: "+err.Error())
+		return
+	}
 	// check size of side art + % of total size
-	// check forbidden extensions
+
 	logthis.Info("Checking folder name", logthis.NORMAL)
 
 	logthis.Info("Generating spectrograms", logthis.NORMAL)
-
+	if _, err := GenerateSpectrograms(release); err != nil {
+		logthis.Error(err, logthis.NORMAL)
+	}
+	logthis.Info("Spectrograms generated in "+metadataDir, logthis.NORMAL)
 }

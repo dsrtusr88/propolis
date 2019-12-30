@@ -27,3 +27,4 @@ linters:
     - funlen
     - dogsled
     - gocognit
+    - unparam # re-enable later

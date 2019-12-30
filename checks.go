@@ -1,20 +1,26 @@
 package main
 
 import (
+	"path/filepath"
 	"strconv"
+	"strings"
+	"sync"
 
 	"gitlab.com/catastrophic/assistance/fs"
 	"gitlab.com/catastrophic/assistance/music"
 )
 
 var (
-	nonFlacExtensions  = []string{".mp3", ".aac", ".ogg", ".alac", ".opus", ".ac3", ".dts", ".wav"}
-	rejectedExtensions = []string{".json"}
+	allowedExtentions = []string{".ac3", ".accurip", ".azw3", ".chm", ".cue", ".djv", ".djvu", ".doc", ".dmg", ".dts", ".epub", ".ffp", ".flac", ".gif", ".htm", ".html", ".jpeg", ".jpg", ".lit", ".log", ".m3u", ".m3u8", ".m4a", ".m4b", ".md5", ".mobi", ".mp3", ".mp4", ".nfo", ".pdf", ".pls", ".png", ".rtf", ".sfv", ".txt"}
+
+	nonFlacExtensions = []string{".mp3", ".aac", ".ogg", ".alac", ".opus", ".ac3", ".dts", ".wav", "mp4"}
+
+	extraFilesExtentions = []string{}
 )
 
 func CheckMusicFiles(release *music.Release) error {
 	isConsistent, bitDepth := release.CheckConsistentBitDepth()
-	log.NonCriticalResult(isConsistent, "2.1.6", "All files are "+bitDepth+"bit files.", "All tracks do not have the same bit depth.")
+	log.NonCriticalResult(isConsistent, "2.1.6", "All files are "+bitDepth+"bit files.", "The tracks do not have the same bit depth.")
 	if !isConsistent {
 		log.BadResult(release.Has24bitTracks(), "2.1.6.2", "At least one track is 24bit FLAC when the rest is 16bit, acceptable for some WEB releases.", "Inconsistent bit depths but no 24bit track.")
 		// TODO check inconsistent but > 24bit
@@ -61,14 +67,11 @@ func CheckOrganization(release *music.Release) error {
 		}
 	}
 
-	// checking for rejected extensions
-	for _, ext := range rejectedExtensions {
-		files, err := fs.GetFilesByExt(release.Path, ext)
-		if err != nil {
-			log.BadResult(err == nil, internalRule, "", "Critical error: "+err.Error())
-			return err
-		}
-		log.CriticalResult(len(files) == 0, internalRule, "Release does not also contain "+ext+" files.", "Release also contains "+ext+" files, would be rejected by upload.php.")
+	// checking for only allowed extensions are used
+	forbidden := fs.GetForbiddenFilesByExt(release.Path, allowedExtentions)
+	log.CriticalResult(len(forbidden) == 0, "wiki#371", "Release only contains allowed extensions. ", "Release contains forbidden extensions, which would be rejected by upload.php.")
+	if len(forbidden) != 0 {
+		log.CriticalResult(len(forbidden) == 0, "wiki#371", "", "Forbidden files: "+strings.Join(forbidden, ", "))
 	}
 
 	// checking for empty dirs or uselessly nested folders
@@ -81,8 +84,39 @@ func CheckTags(release *music.Release) error {
 	log.CriticalResult(release.CheckTags() == nil, "2.3.16.4", "All tracks have at least the required tags.", "At least one tracks is missing required tags.")
 	log.CriticalResult(release.CheckMaxCoverSize() <= 1024*1024, "2.3.19", "All tracks either have no embedded art, or the embedded art size is less than 1024KiB.", "At least one track has embedded art exceeding the maximum allowed size of 1024 KiB.")
 
-	// check album artist
+	// check album artists + album title is the same everywhere
 	// check combined tags
 
 	return nil
+}
+
+func CheckExtraFiles(release *music.Release) error {
+	log.NonCriticalResult(fs.FileExists(filepath.Join(release.Path, music.DefaultCover)), internalRule, "Release has a conventional "+music.DefaultCover+" in the top folder.", "Cannot find "+music.DefaultCover+" in top folder, consider adding one or renaming the cover to that name.")
+
+	return nil
+}
+
+func GenerateSpectrograms(release *music.Release) ([]string, error) {
+	var wg sync.WaitGroup
+	var combinedPNG string
+	var combinedErr error
+	// generating combinedPNG in the background
+	wg.Add(1)
+	go func() {
+		// combination of 10s slices from each song
+		combinedPNG, combinedErr = release.GenerateCombinedSpectrogram()
+		wg.Done()
+	}()
+	// generating full spectrograms
+	pngs, err := release.GenerateSpectrograms(" ")
+	if err != nil {
+		return []string{}, err
+	}
+	// checking combined PNG was correctly created
+	wg.Wait()
+	if combinedErr != nil {
+		return []string{}, combinedErr
+	}
+	pngs = append([]string{combinedPNG}, pngs...)
+	return pngs, nil
 }
