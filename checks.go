@@ -48,12 +48,18 @@ func CheckMusicFiles(release *music.Release) error {
 	// TODO check for ID3 tags 2.2.10.8
 
 	// checking flacs
-	log.CriticalResult(release.Check() == nil, internalRule, "All FLACs are valid FLACs.", "At least one FLAC failed integrity check")
+	log.CriticalResult(release.Check() == nil, internalRule, "Integrity checks for all FLACs OK.", "At least one FLAC failed integrity check")
 	return nil
 }
 
 func CheckOrganization(release *music.Release) error {
-	log.CriticalResult(fs.GetMaxPathLength(release.Path) < 180, "2.3.12", "Maximum character length is less than 180 characters", "Maximum character length exceeds 180 character.")
+	notTooLong := fs.GetMaxPathLength(release.Path) < 180
+	log.CriticalResult(notTooLong, "2.3.12", "Maximum character length is less than 180 characters.", "Maximum character length exceeds 180 characters.")
+	if !notTooLong {
+		for _, f := range fs.GetExceedinglyLongPaths(release.Path, 180) {
+			log.CriticalResult(notTooLong, "2.3.12", "", "Too long: "+f)
+		}
+	}
 
 	// checking for rejected extensions
 	for _, ext := range rejectedExtensions {
@@ -64,5 +70,15 @@ func CheckOrganization(release *music.Release) error {
 		}
 		log.CriticalResult(len(files) == 0, internalRule, "Release does not also contain "+ext+" files.", "Release also contains "+ext+" files, would be rejected by upload.php.")
 	}
+	return nil
+}
+
+func CheckTags(release *music.Release) error {
+	log.CriticalResult(release.CheckTags() == nil, "2.3.16.4", "All tracks have at least the required tags.", "At least one tracks is missing required tags.")
+	log.CriticalResult(release.CheckMaxCoverSize() <= 1024*1024, "2.3.19", "All tracks either have no embedded art, or the embedded art size is less than 1024KiB.", "At least one track has embedded art exceeding the maximum allowed size of 1024 KiB.")
+
+	// check album artist
+	// check combined tags
+
 	return nil
 }

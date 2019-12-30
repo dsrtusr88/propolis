@@ -56,8 +56,11 @@ func main() {
 	// in folder or subfolders for CDs
 
 	logthis.Info("Checking tags", logthis.NORMAL)
-	// check minimal tags
-	// check embedded art
+	if err := CheckTags(release); err != nil {
+		log.BadResult(err == nil, internalRule, "", "Critical error: "+err.Error())
+		return
+	}
+
 	logthis.Info("Checking filenames", logthis.NORMAL)
 	// 2.3.13.filenames contain track
 	// filenames contain at least beginning of title
