@@ -49,9 +49,12 @@ func main() {
 	}
 
 	logthis.Info("Checking organization", logthis.NORMAL)
+	if err := CheckOrganization(release); err != nil {
+		log.BadResult(err == nil, internalRule, "", "Critical error: "+err.Error())
+		return
+	}
 	// in folder or subfolders for CDs
-	// get tags
-	// max length Rule 2.3.12
+
 	logthis.Info("Checking tags", logthis.NORMAL)
 	// check minimal tags
 	// check embedded art
@@ -66,4 +69,7 @@ func main() {
 	// check size of side art + % of total size
 	// check forbidden extensions
 	logthis.Info("Checking folder name", logthis.NORMAL)
+
+	logthis.Info("Generating spectrograms", logthis.NORMAL)
+
 }
