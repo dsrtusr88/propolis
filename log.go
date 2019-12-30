@@ -18,7 +18,7 @@ func (l *Log) CriticalResult(check bool, rule, commentOK, commentKO string) {
 		res = ui.RedBold("KO")
 		comment = ui.RedBold(commentKO)
 	}
-	logthis.Info(fmt.Sprintf("%s | %s | %s", res, rule, comment), logthis.NORMAL)
+	l.log(res, rule, comment)
 }
 
 func (l *Log) NonCriticalResult(check bool, rule, commentOK, commentKO string) {
@@ -28,7 +28,7 @@ func (l *Log) NonCriticalResult(check bool, rule, commentOK, commentKO string) {
 		res = ui.YellowBold("KO")
 		comment = ui.YellowBold(commentKO)
 	}
-	logthis.Info(fmt.Sprintf("%s | %s | %s", res, rule, comment), logthis.NORMAL)
+	l.log(res, rule, comment)
 }
 
 func (l *Log) NeutralResult(check bool, rule, commentOK, commentKO string) {
@@ -38,7 +38,7 @@ func (l *Log) NeutralResult(check bool, rule, commentOK, commentKO string) {
 		res = ui.BlueBold("KO")
 		comment = ui.BlueBold(commentKO)
 	}
-	logthis.Info(fmt.Sprintf("%s | %s | %s", res, rule, comment), logthis.NORMAL)
+	l.log(res, rule, comment)
 }
 
 func (l *Log) BadResult(check bool, rule, commentOK, commentKO string) {
@@ -48,5 +48,9 @@ func (l *Log) BadResult(check bool, rule, commentOK, commentKO string) {
 		res = ui.RedBold("KO")
 		comment = ui.RedBold(commentKO)
 	}
-	logthis.Info(fmt.Sprintf("%s | %s | %s", res, rule, comment), logthis.NORMAL)
+	l.log(res, rule, comment)
+}
+
+func (l *Log) log(res, rule, comment string) {
+	logthis.Info(fmt.Sprintf(" %2s | %-10s | %s", res, rule, comment), logthis.NORMAL)
 }
