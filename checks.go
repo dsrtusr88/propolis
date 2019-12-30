@@ -44,10 +44,16 @@ func CheckMusicFiles(release *music.Release) error {
 	forbidden := fs.GetAllowedFilesByExt(release.Path, nonFlacMusicExtensions)
 	log.CriticalResult(len(forbidden) == 0, "2.1.6.3", "Release does not also contain other kinds of music files.", "Release also contains other music formats, possible mutt rip: "+strings.Join(forbidden, ","))
 
-	// TODO check for ID3 tags 2.2.10.8
-
 	// checking flacs
-	log.CriticalResult(release.Check() == nil, internalRule, "Integrity checks for all FLACs OK.", "At least one FLAC failed integrity check")
+	err := release.Check()
+	log.CriticalResult(err == nil, "2.2.10.8", "Integrity checks for all FLACs OK, no ID3 tags detected.", "At least one track is not a valid FLAC file.")
+	if err != nil {
+		if err.Error() == music.ErrorContainsID3Tags {
+			log.CriticalResult(err == nil, "2.2.10.8", "", "At least one FLAC has illegal ID3 tags.")
+		} else {
+			log.CriticalResult(err == nil, internalRule, "", "At least one FLAC has failed an integrity test.")
+		}
+	}
 	return nil
 }
 
@@ -74,7 +80,7 @@ func CheckOrganization(release *music.Release) error {
 }
 
 func CheckTags(release *music.Release) error {
-	log.CriticalResult(release.CheckTags() == nil, "2.3.16.4", "All tracks have at least the required tags.", "At least one tracks is missing required tags.")
+	log.CriticalResult(release.CheckTags() == nil, "2.3.16.1/4", "All tracks have at least the required tags.", "At least one tracks is missing required tags.")
 	log.CriticalResult(release.CheckMaxCoverSize() <= 1024*1024, "2.3.19", "All tracks either have no embedded art, or the embedded art size is less than 1024KiB.", "At least one track has embedded art exceeding the maximum allowed size of 1024 KiB.")
 
 	// check album artists + album title is the same everywhere
