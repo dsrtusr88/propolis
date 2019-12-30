@@ -70,6 +70,10 @@ func CheckOrganization(release *music.Release) error {
 		}
 		log.CriticalResult(len(files) == 0, internalRule, "Release does not also contain "+ext+" files.", "Release also contains "+ext+" files, would be rejected by upload.php.")
 	}
+
+	// checking for empty dirs or uselessly nested folders
+	log.CriticalResult(!fs.HasEmptyNestedFolders(release.Path), "2.3.3", "Release does not have empty folders or unnecessary nested folders.", "Release has empty folders or unnecessary nested folders.")
+
 	return nil
 }
 
