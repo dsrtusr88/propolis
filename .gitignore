@@ -1,5 +1,6 @@
 .idea/
 archives/
+test/
 config*.yaml
 *.txt
 *.png
