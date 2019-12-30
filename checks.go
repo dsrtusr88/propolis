@@ -11,11 +11,10 @@ import (
 )
 
 var (
-	allowedExtentions = []string{".ac3", ".accurip", ".azw3", ".chm", ".cue", ".djv", ".djvu", ".doc", ".dmg", ".dts", ".epub", ".ffp", ".flac", ".gif", ".htm", ".html", ".jpeg", ".jpg", ".lit", ".log", ".m3u", ".m3u8", ".m4a", ".m4b", ".md5", ".mobi", ".mp3", ".mp4", ".nfo", ".pdf", ".pls", ".png", ".rtf", ".sfv", ".txt"}
+	// https://redacted.ch/wiki.php?action=article&id=371
+	allowedExtensions = []string{".ac3", ".accurip", ".azw3", ".chm", ".cue", ".djv", ".djvu", ".doc", ".dmg", ".dts", ".epub", ".ffp", ".flac", ".gif", ".htm", ".html", ".jpeg", ".jpg", ".lit", ".log", ".m3u", ".m3u8", ".m4a", ".m4b", ".md5", ".mobi", ".mp3", ".mp4", ".nfo", ".pdf", ".pls", ".png", ".rtf", ".sfv", ".txt"}
 
-	nonFlacExtensions = []string{".mp3", ".aac", ".ogg", ".alac", ".opus", ".ac3", ".dts", ".wav", "mp4"}
-
-	extraFilesExtentions = []string{}
+	nonFlacMusicExtensions = []string{".ac3", ".dts", ".m4a", ".m4b", ".mp3", ".mp4", ".aac", ".alac", ".ogg", ".opus"}
 )
 
 func CheckMusicFiles(release *music.Release) error {
@@ -42,14 +41,8 @@ func CheckMusicFiles(release *music.Release) error {
 	log.CriticalResult(minAvgBitRate > 192000, "2.1.3", "All tracks have at least 192kbps bitrate (between "+strconv.Itoa(minAvgBitRate/1000)+"kbps and "+strconv.Itoa(maxAvgBitRate/1000)+"kbps).", "At least one file has a lower than 192kbps bit rate: "+strconv.Itoa(minAvgBitRate))
 
 	// checking for mutt rip
-	for _, ext := range nonFlacExtensions {
-		files, err := fs.GetFilesByExt(release.Path, ext)
-		if err != nil {
-			log.BadResult(err == nil, internalRule, "", "Critical error: "+err.Error())
-			return err
-		}
-		log.CriticalResult(len(files) == 0, "2.1.6.3", "Release does not also contain "+ext+" files.", "Release also contains "+ext+" files, possible mutt rip.")
-	}
+	forbidden := fs.GetAllowedFilesByExt(release.Path, nonFlacMusicExtensions)
+	log.CriticalResult(len(forbidden) == 0, "2.1.6.3", "Release does not also contain other kinds of music files.", "Release also contains other music formats, possible mutt rip: "+strings.Join(forbidden, ","))
 
 	// TODO check for ID3 tags 2.2.10.8
 
@@ -68,7 +61,7 @@ func CheckOrganization(release *music.Release) error {
 	}
 
 	// checking for only allowed extensions are used
-	forbidden := fs.GetForbiddenFilesByExt(release.Path, allowedExtentions)
+	forbidden := fs.GetForbiddenFilesByExt(release.Path, allowedExtensions)
 	log.CriticalResult(len(forbidden) == 0, "wiki#371", "Release only contains allowed extensions. ", "Release contains forbidden extensions, which would be rejected by upload.php.")
 	if len(forbidden) != 0 {
 		log.CriticalResult(len(forbidden) == 0, "wiki#371", "", "Forbidden files: "+strings.Join(forbidden, ", "))
