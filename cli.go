@@ -11,9 +11,11 @@ import (
 const (
 	usage = `
 	
+	PROPOLIS (v%s)
+	
 Description:
     Make sure files are in good shape before uploading.
-	Detect trumpable releases.
+    Detect trumpable releases.
 	
 Usage:
     propolis [-c|--check-for-dupes] <PATH>
