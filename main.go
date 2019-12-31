@@ -65,12 +65,16 @@ func main() {
 	}
 
 	logthis.Info("Checking filenames", logthis.NORMAL)
-	// 2.3.13.filenames contain track
+	if err := CheckFilenames(release); err != nil {
+		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
+		return
+	}
 	// filenames contain at least beginning of title
 	// 2.3.14. check numbers at beginning of filenames
 	// 2.3.15. no 2 same numbers in folder
 	// flac is small caps
 	// 2.3.20. Leading spaces are not allowed in any file or folder names + leading dots
+
 	logthis.Info("Checking extra files", logthis.NORMAL)
 	if err := CheckExtraFiles(release); err != nil {
 		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())

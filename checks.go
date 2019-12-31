@@ -108,6 +108,11 @@ func CheckTags(release *music.Release) error {
 	return nil
 }
 
+func CheckFilenames(release *music.Release) error {
+	log.CriticalResult(release.CheckTrackNumbersInFilenames(), "2.3.13", "All tracks filenames appear to contain track numbers.", "At least one track filename does not contain the track number.")
+	return nil
+}
+
 func CheckExtraFiles(release *music.Release) error {
 	log.NonCriticalResult(fs.FileExists(filepath.Join(release.Path, music.DefaultCover)), internalRule, "Release has a conventional "+music.DefaultCover+" in the top folder.", "Cannot find "+music.DefaultCover+" in top folder, consider adding one or renaming the cover to that name.")
 
