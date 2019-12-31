@@ -5,6 +5,7 @@ import (
 
 	"gitlab.com/catastrophic/assistance/logthis"
 	"gitlab.com/catastrophic/assistance/music"
+	"gitlab.com/catastrophic/assistance/ui"
 )
 
 const (
@@ -38,9 +39,9 @@ func main() {
 
 	logthis.Info("Checking Path is a music release", logthis.NORMAL)
 	err := release.ParseFiles()
-	log.CriticalResult(err == nil, internalRule, "Release contains FLAC files", "Error parsing files")
+	log.CriticalResult(err == nil, "2.3.1", "Release contains FLAC files", "Error parsing files")
 	if err != nil {
-		log.BadResult(err == nil, internalRule, "", "Critical error: "+err.Error())
+		log.BadResult(err == nil, "2.3.1", "", "Critical error: "+err.Error())
 		return
 	}
 
@@ -83,5 +84,5 @@ func main() {
 	if _, err := GenerateSpectrograms(release); err != nil {
 		logthis.Error(err, logthis.NORMAL)
 	}
-	logthis.Info("Spectrograms generated in "+metadataDir, logthis.NORMAL)
+	logthis.Info(ui.BlueBold("Spectrograms generated in "+metadataDir), logthis.NORMAL)
 }

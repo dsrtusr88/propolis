@@ -54,6 +54,13 @@ func CheckMusicFiles(release *music.Release) error {
 			log.CriticalResult(err == nil, internalRule, "", "At least one FLAC has failed an integrity test.")
 		}
 	}
+
+	// checking for uncompressed flacs
+	err = release.CheckCompression()
+	log.CriticalResult(err == nil, "2.2.10.10", "First track does not seem to be uncompressed FLAC.", "Error checking for uncompressed FLAC.")
+	if err != nil && err.Error() == music.ErrorUncompressed {
+		log.CriticalResult(err == nil, "2.2.10.10", "", "The first track is uncompressed FLAC.")
+	}
 	return nil
 }
 
@@ -83,9 +90,16 @@ func CheckTags(release *music.Release) error {
 	log.CriticalResult(release.CheckTags() == nil, "2.3.16.1/4", "All tracks have at least the required tags.", "At least one tracks is missing required tags.")
 	log.CriticalResult(release.CheckMaxCoverSize() <= 1024*1024, "2.3.19", "All tracks either have no embedded art, or the embedded art size is less than 1024KiB.", "At least one track has embedded art exceeding the maximum allowed size of 1024 KiB.")
 
-	// check album artists + album title is the same everywhere
+	err := release.CheckConsistentTags()
+	log.CriticalResult(err == nil, internalRule, "Release-level tags seem consistent among tracks.", "Tracks have inconsistent tags about the release.")
+	if err != nil {
+		log.CriticalResult(err == nil, internalRule, "", "More precisely: "+err.Error())
+		// TODO album title can be different in case of multidisc -- 2.3.18.3.3
+	}
+
 	// check combined tags
 
+	// TODO export tags to txt file
 	return nil
 }
 
