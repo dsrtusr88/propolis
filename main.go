@@ -41,26 +41,26 @@ func main() {
 	err := release.ParseFiles()
 	log.CriticalResult(err == nil, "2.3.1", "Release contains FLAC files", "Error parsing files")
 	if err != nil {
-		log.BadResult(err == nil, "2.3.1", "", "Critical error: "+err.Error())
+		log.BadResult(err == nil, "2.3.1", "", "⮕ Critical error: "+err.Error())
 		return
 	}
 
 	logthis.Info("Checking music files", logthis.NORMAL)
 	if err := CheckMusicFiles(release); err != nil {
-		log.BadResult(err == nil, internalRule, "", "Critical error: "+err.Error())
+		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
 		return
 	}
 
 	logthis.Info("Checking organization", logthis.NORMAL)
 	if err := CheckOrganization(release); err != nil {
-		log.BadResult(err == nil, internalRule, "", "Critical error: "+err.Error())
+		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
 		return
 	}
 	// in folder or subfolders for CDs
 
 	logthis.Info("Checking tags", logthis.NORMAL)
 	if err := CheckTags(release); err != nil {
-		log.BadResult(err == nil, internalRule, "", "Critical error: "+err.Error())
+		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
 		return
 	}
 
@@ -73,7 +73,7 @@ func main() {
 	// 2.3.20. Leading spaces are not allowed in any file or folder names + leading dots
 	logthis.Info("Checking extra files", logthis.NORMAL)
 	if err := CheckExtraFiles(release); err != nil {
-		log.BadResult(err == nil, internalRule, "", "Critical error: "+err.Error())
+		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
 		return
 	}
 	// check size of side art + % of total size
