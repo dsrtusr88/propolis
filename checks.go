@@ -10,10 +10,13 @@ import (
 	"gitlab.com/catastrophic/assistance/music"
 )
 
+const (
+	minTitleSize = 10
+)
+
 var (
 	// https://redacted.ch/wiki.php?action=article&id=371
-	allowedExtensions = []string{".ac3", ".accurip", ".azw3", ".chm", ".cue", ".djv", ".djvu", ".doc", ".dmg", ".dts", ".epub", ".ffp", ".flac", ".gif", ".htm", ".html", ".jpeg", ".jpg", ".lit", ".log", ".m3u", ".m3u8", ".m4a", ".m4b", ".md5", ".mobi", ".mp3", ".mp4", ".nfo", ".pdf", ".pls", ".png", ".rtf", ".sfv", ".txt"}
-
+	allowedExtensions      = []string{".ac3", ".accurip", ".azw3", ".chm", ".cue", ".djv", ".djvu", ".doc", ".dmg", ".dts", ".epub", ".ffp", ".flac", ".gif", ".htm", ".html", ".jpeg", ".jpg", ".lit", ".log", ".m3u", ".m3u8", ".m4a", ".m4b", ".md5", ".mobi", ".mp3", ".mp4", ".nfo", ".pdf", ".pls", ".png", ".rtf", ".sfv", ".txt"}
 	nonFlacMusicExtensions = []string{".ac3", ".dts", ".m4a", ".m4b", ".mp3", ".mp4", ".aac", ".alac", ".ogg", ".opus"}
 
 	forbiddenCharacters        = []string{":", "*", `\`, "?", `"`, `<`, `>`, "|", "$", "`"}
@@ -109,7 +112,15 @@ func CheckTags(release *music.Release) error {
 }
 
 func CheckFilenames(release *music.Release) error {
+	withForbiddenChars := fs.GetFilesAndFoldersBySubstring(release.Path, forbiddenCharacters)
+	log.CriticalResult(len(withForbiddenChars) == 0, internalRule, "Tracks filenames do not appear to contain problematic characters.", "At least one track filename or folder contains problematic characters.")
+	if len(withForbiddenChars) != 0 {
+		log.CriticalResult(len(withForbiddenChars) == 0, internalRule, "", "⮕ In files and folders: "+strings.Join(withForbiddenChars, ", "))
+	}
+
 	log.CriticalResult(release.CheckTrackNumbersInFilenames(), "2.3.13", "All tracks filenames appear to contain track numbers.", "At least one track filename does not contain the track number.")
+
+	log.CriticalResult(release.CheckFilenameContainsStartOfTitle(minTitleSize), "2.3.11", "All tracks filenames appear to contain at least the beginning of song titles.", "At least one track filename does not seem to include the beginning of the song title.")
 	return nil
 }
 
