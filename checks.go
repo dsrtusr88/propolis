@@ -18,6 +18,7 @@ var (
 	// https://redacted.ch/wiki.php?action=article&id=371
 	allowedExtensions      = []string{".ac3", ".accurip", ".azw3", ".chm", ".cue", ".djv", ".djvu", ".doc", ".dmg", ".dts", ".epub", ".ffp", ".flac", ".gif", ".htm", ".html", ".jpeg", ".jpg", ".lit", ".log", ".m3u", ".m3u8", ".m4a", ".m4b", ".md5", ".mobi", ".mp3", ".mp4", ".nfo", ".pdf", ".pls", ".png", ".rtf", ".sfv", ".txt"}
 	nonFlacMusicExtensions = []string{".ac3", ".dts", ".m4a", ".m4b", ".mp3", ".mp4", ".aac", ".alac", ".ogg", ".opus"}
+	nonMusicExtensions     = []string{".accurip", ".azw3", ".chm", ".cue", ".djv", ".djvu", ".doc", ".dmg", ".epub", ".ffp", ".gif", ".htm", ".html", ".jpeg", ".jpg", ".lit", ".log", ".m3u", ".m3u8", ".md5", ".mobi", ".nfo", ".pdf", ".pls", ".png", ".rtf", ".sfv", ".txt"}
 
 	forbiddenCharacters        = []string{":", "*", `\`, "?", `"`, `<`, `>`, "|", "$", "`"}
 	forbiddenLeadingCharacters = []string{" ", "."}
@@ -118,6 +119,15 @@ func CheckFilenames(release *music.Release) error {
 		log.CriticalResult(len(withForbiddenChars) == 0, internalRule, "", "⮕ In files and folders: "+strings.Join(withForbiddenChars, ", "))
 	}
 
+	var capitalizedExt bool
+	for _, f := range release.Flacs {
+		if filepath.Ext(f.Filename) == ".FLAC" {
+			capitalizedExt = true
+			break
+		}
+	}
+	log.NonCriticalResult(!capitalizedExt, internalRule, "Track filenames have lower case extensions.", "At least one filename has a .FLAC extention.")
+
 	log.CriticalResult(release.CheckTrackNumbersInFilenames(), "2.3.13", "All tracks filenames appear to contain track numbers.", "At least one track filename does not contain the track number.")
 
 	log.CriticalResult(release.CheckFilenameContainsStartOfTitle(minTitleSize), "2.3.11", "All tracks filenames appear to contain at least the beginning of song titles.", "At least one track filename does not seem to include the beginning of the song title.")
@@ -126,6 +136,9 @@ func CheckFilenames(release *music.Release) error {
 
 func CheckExtraFiles(release *music.Release) error {
 	log.NonCriticalResult(fs.FileExists(filepath.Join(release.Path, music.DefaultCover)), internalRule, "Release has a conventional "+music.DefaultCover+" in the top folder.", "Cannot find "+music.DefaultCover+" in top folder, consider adding one or renaming the cover to that name.")
+
+	nonMusic := fs.GetAllowedFilesByExt(release.Path, nonMusicExtensions)
+	log.NonCriticalResult(len(nonMusic) != 0, internalRule, "Release has "+strconv.Itoa(len(nonMusic))+" accompanying files.", "Release does not have any kind of accompanying files. Suggestion: consider adding at least a cover.")
 
 	return nil
 }
