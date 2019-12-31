@@ -140,6 +140,12 @@ func CheckExtraFiles(release *music.Release) error {
 	nonMusic := fs.GetAllowedFilesByExt(release.Path, nonMusicExtensions)
 	log.NonCriticalResult(len(nonMusic) != 0, internalRule, "Release has "+strconv.Itoa(len(nonMusic))+" accompanying files.", "Release does not have any kind of accompanying files. Suggestion: consider adding at least a cover.")
 
+	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
+	nonMusicSize := float64(fs.GetPartialSize(release.Path, nonMusic)) / (1024 * 1024)
+	log.NeutralResult(true, internalRule, "Total size of accompanying files: "+strconv.FormatFloat(nonMusicSize, 'f', 2, 32)+"Mb.", "")
+	ratio := 100 * nonMusicSize / totalSize
+	log.NonCriticalResult(ratio < 10, internalRule, "Accompanying files represent "+strconv.FormatFloat(ratio, 'f', 2, 32)+"% of the total size.", "Accompanying files represent "+strconv.FormatFloat(ratio, 'f', 2, 32)+"% of the total size. Suggestion: if this is because of high resolution artwork or notes, consider uploading separately and linking the files in the description.")
+
 	return nil
 }
 

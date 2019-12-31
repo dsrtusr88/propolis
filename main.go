@@ -2,7 +2,9 @@ package main
 
 import (
 	"os"
+	"strconv"
 
+	"gitlab.com/catastrophic/assistance/fs"
 	"gitlab.com/catastrophic/assistance/logthis"
 	"gitlab.com/catastrophic/assistance/music"
 	"gitlab.com/catastrophic/assistance/ui"
@@ -44,6 +46,8 @@ func main() {
 		log.BadResult(err == nil, "2.3.1", "", "⮕ Critical error: "+err.Error())
 		return
 	}
+	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
+	log.NeutralResult(true, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", "")
 
 	logthis.Info("Checking music files", logthis.NORMAL)
 	if err := CheckMusicFiles(release); err != nil {
@@ -77,7 +81,6 @@ func main() {
 		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
 		return
 	}
-	// check size of side art + % of total size
 
 	logthis.Info("Checking folder name", logthis.NORMAL)
 
