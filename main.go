@@ -60,7 +60,6 @@ func main() {
 		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
 		return
 	}
-	// in folder or subfolders for CDs
 
 	logthis.Info("Checking tags", logthis.NORMAL)
 	if err := CheckTags(release); err != nil {
@@ -73,8 +72,6 @@ func main() {
 		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
 		return
 	}
-	// 2.3.14. check numbers at beginning of filenames or common prefix
-	// 2.3.15. no 2 same numbers in folder
 
 	logthis.Info("Checking extra files", logthis.NORMAL)
 	if err := CheckExtraFiles(release); err != nil {

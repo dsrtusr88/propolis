@@ -92,6 +92,15 @@ func CheckOrganization(release *music.Release) error {
 
 	log.CriticalResult(len(fs.GetFilesAndFoldersByPrefix(release.Path, forbiddenLeadingCharacters)) == 0, "2.3.20", "No leading space/dot found in files and folders.", "Release has files or folders with a leading space or dot.")
 
+	if release.NumberOfDiscs() > 1 {
+		err := release.CheckMultiDiscOrganization()
+		if err != nil {
+			log.CriticalResult(err == nil, "2.3.15", "", "Tracks from this multi-disc release are incorrectly organized: "+err.Error())
+		} else {
+			log.CriticalResult(err == nil, "2.3.15", "Files from multiple discs are either in top folder with disc numbers in filenames, or in dedicated subfolders.", "")
+		}
+	}
+
 	return nil
 }
 
@@ -128,7 +137,7 @@ func CheckFilenames(release *music.Release) error {
 	}
 	log.NonCriticalResult(!capitalizedExt, internalRule, "Track filenames have lower case extensions.", "At least one filename has an uppercase .FLAC extension.")
 
-	log.CriticalResult(release.CheckTrackNumbersInFilenames(), "2.3.13", "All tracks filenames appear to contain track numbers.", "At least one track filename does not contain the track number.")
+	log.CriticalResult(release.CheckTrackNumbersInFilenames(), "2.3.13", "All tracks filenames appear to contain their track number.", "At least one track filename does not contain its track number.")
 
 	log.CriticalResult(release.CheckFilenameContainsStartOfTitle(minTitleSize), "2.3.11", "All tracks filenames appear to contain at least the beginning of song titles.", "At least one track filename does not seem to include the beginning of the song title.")
 
