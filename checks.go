@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -146,6 +147,51 @@ func CheckFilenames(release *music.Release) error {
 		log.CriticalResult(err == nil, internalRule, "", "Could not check filename/subfolder order. Track/Disc numbers might not be numbers: "+err.Error())
 	} else {
 		log.CriticalResult(ordered, "2.3.14./.2", "Files and subfolder names respect the playing order of the release.", "Files and/or subfolder names do not sort alphabetically into the playing order of the release.")
+	}
+
+	return nil
+}
+
+func CheckFolderName(release *music.Release) error {
+	if len(release.Flacs) == 0 {
+		return errors.New("no tracks")
+	}
+	// getting metadata
+	title := release.Flacs[0].Tags.Album
+	log.CriticalResult(strings.Contains(release.Path, title), "2.3.2", "Title of album is in folder name.", "Title of album (as found in the tags of the first track) is not in the folder name.")
+
+	artists := release.Flacs[0].Tags.AlbumArtist
+	var artistsFound int
+	for _, a := range artists {
+		if strings.Contains(release.Path, a) {
+			artistsFound++
+		}
+	}
+	log.NonCriticalResult(len(artists) == artistsFound, "2.3.2", "All album artists found in folder name.", "Not all (if any) album artists (as found in the tags of the first track) found in the folder name.")
+
+	year := release.Flacs[0].Tags.Year
+	date := release.Flacs[0].Tags.Date
+	if year != "" || date != "" {
+		var foundYear, foundDate bool
+		if year != "" {
+			foundYear = strings.Contains(release.Path, year)
+		}
+		if date != "" {
+			foundDate = strings.Contains(release.Path, date)
+		}
+		log.NonCriticalResult(foundYear || foundDate, "2.3.2", "Year of album is in folder name.", "Year of album (as found in the tags of the first track) is not in the folder name.")
+	}
+	log.NonCriticalResult(strings.Contains(release.Path, "FLAC"), "2.3.2", "Format (FLAC) found in folder name.", "Format (FLAC) not found in folder name.")
+
+	if release.Has24bitTracks() {
+		log.NonCriticalResult(strings.Contains(release.Path, "24"), "2.3.2", "Folder name properly mentions the release has 24bit FLAC tracks.", "Since release seems to contain 24bit FLACs, the folder name could mention it. ")
+	}
+
+	logsAndCues := fs.GetAllowedFilesByExt(release.Path, []string{".log", ".cue"})
+	if len(logsAndCues) != 0 {
+		log.NonCriticalResult(strings.Contains(release.Path, "CD"), "2.3.2", "Release contains .log/.cue files and the folder name properly mentions a CD source.", "Since release contains .log/.cue, it seems to be sourced from CD. The folder name could mention it. ")
+	} else {
+		log.NonCriticalResult(strings.Contains(release.Path, "WEB"), "2.3.2", "Release does not contain .log/.cue files and the folder name properly mentions a WEB source.", "Since release does not .log/.cue, it is probably sources from WEB. The folder name could mention it. ")
 	}
 
 	return nil

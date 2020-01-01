@@ -80,6 +80,10 @@ func main() {
 	}
 
 	logthis.Info("Checking folder name", logthis.NORMAL)
+	if err := CheckFolderName(release); err != nil {
+		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
+		return
+	}
 
 	logthis.Info("Generating spectrograms", logthis.NORMAL)
 	if _, err := GenerateSpectrograms(release); err != nil {
