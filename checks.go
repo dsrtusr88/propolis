@@ -131,6 +131,14 @@ func CheckFilenames(release *music.Release) error {
 	log.CriticalResult(release.CheckTrackNumbersInFilenames(), "2.3.13", "All tracks filenames appear to contain track numbers.", "At least one track filename does not contain the track number.")
 
 	log.CriticalResult(release.CheckFilenameContainsStartOfTitle(minTitleSize), "2.3.11", "All tracks filenames appear to contain at least the beginning of song titles.", "At least one track filename does not seem to include the beginning of the song title.")
+
+	ordered, err := release.CheckFilenameOrder()
+	if err != nil {
+		log.CriticalResult(err == nil, internalRule, "", "Could not check filename/subfolder order. Track/Disc numbers might not be numbers: "+err.Error())
+	} else {
+		log.CriticalResult(ordered, "2.3.14./.2", "Files and subfolder names respect the playing order of the release.", "Files and/or subfolder names do not sort alphabetically into the playing order of the release.")
+	}
+
 	return nil
 }
 

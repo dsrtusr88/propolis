@@ -7,4 +7,5 @@ config*.yaml
 *.png
 log
 TODO
-
+*_test.go
+propolis
