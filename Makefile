@@ -24,11 +24,15 @@ test-coverage:
 	${GO} test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
 clean:
-	rm -f coverage.txt
 	rm -f propolis
+	rm -f propolis_darwin
+	rm -f propolis_windows.exe
+	rm -f coverage.txt
 
 build:
-	${GO} build -v ./...
+	${GO} build -v -o propolis
+	GOOS=darwin GOARCH=amd64 ${GO} build -v -o propolis_darwin
+	GOOS=windows GOARCH=amd64 ${GO} build -v -o propolis_windows.exe
 
 install:
 	${GO} install -v ./...
