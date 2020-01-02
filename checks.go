@@ -198,7 +198,7 @@ func CheckFolderName(release *music.Release) error {
 }
 
 func CheckExtraFiles(release *music.Release) error {
-	log.NonCriticalResult(fs.FileExists(filepath.Join(release.Path, music.DefaultCover)), internalRule, "Release has a conventional "+music.DefaultCover+" in the top folder.", "Cannot find "+music.DefaultCover+" in top folder, consider adding one or renaming the cover to that name.")
+	log.NonCriticalResult(release.HasCover(), internalRule, "Release has a conventional "+music.DefaultCover+" in the top folder or in all disc subfolders.", "Cannot find "+music.DefaultCover+" in top folder or in all disc subfolders, consider adding one or renaming the cover to that name.")
 
 	nonMusic := fs.GetAllowedFilesByExt(release.Path, nonMusicExtensions)
 	log.NonCriticalResult(len(nonMusic) != 0, internalRule, "Release has "+strconv.Itoa(len(nonMusic))+" accompanying files.", "Release does not have any kind of accompanying files. Suggestion: consider adding at least a cover.")
