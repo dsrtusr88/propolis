@@ -9,6 +9,7 @@ import (
 
 	"gitlab.com/catastrophic/assistance/fs"
 	"gitlab.com/catastrophic/assistance/music"
+	"gitlab.com/catastrophic/assistance/strslice"
 )
 
 const (
@@ -156,17 +157,32 @@ func CheckFolderName(release *music.Release) error {
 	if len(release.Flacs) == 0 {
 		return errors.New("no tracks")
 	}
+	// comparisons are case insensitive
+	folderName := strings.ToLower(filepath.Base(release.Path))
+
 	// getting metadata
 	title := release.Flacs[0].Tags.Album
-	log.CriticalResult(strings.Contains(release.Path, title), "2.3.2", "Title of album is in folder name.", "Title of album (as found in the tags of the first track) is not in the folder name.")
+	log.CriticalResult(strings.Contains(folderName, strings.ToLower(title)), "2.3.2", "Title of album is in folder name.", "Title of album (as found in the tags of the first track) is not in the folder name.")
 
 	artists := release.Flacs[0].Tags.AlbumArtist
+	if len(artists) == 0 {
+		// no album artist found, falling back to artists
+		for _, f := range release.Flacs {
+			artists = append(artists, f.Tags.Artist...)
+		}
+		strslice.RemoveDuplicates(&artists)
+	}
+	// if more than 3 artists, release should be VA
+	if len(artists) >= 3 {
+		artists = []string{"Various Artists", "VA"}
+	}
 	var artistsFound int
 	for _, a := range artists {
-		if strings.Contains(release.Path, a) {
+		if strings.Contains(folderName, strings.ToLower(a)) {
 			artistsFound++
 		}
 	}
+
 	log.NonCriticalResult(len(artists) == artistsFound, "2.3.2", "All album artists found in folder name.", "Not all (if any) album artists (as found in the tags of the first track) found in the folder name.")
 
 	year := release.Flacs[0].Tags.Year
@@ -174,24 +190,24 @@ func CheckFolderName(release *music.Release) error {
 	if year != "" || date != "" {
 		var foundYear, foundDate bool
 		if year != "" {
-			foundYear = strings.Contains(release.Path, year)
+			foundYear = strings.Contains(folderName, year)
 		}
 		if date != "" {
-			foundDate = strings.Contains(release.Path, date)
+			foundDate = strings.Contains(folderName, date)
 		}
 		log.NonCriticalResult(foundYear || foundDate, "2.3.2", "Year of album is in folder name.", "Year of album (as found in the tags of the first track) is not in the folder name.")
 	}
-	log.NonCriticalResult(strings.Contains(release.Path, "FLAC"), "2.3.2", "Format (FLAC) found in folder name.", "Format (FLAC) not found in folder name.")
+	log.NonCriticalResult(strings.Contains(folderName, "flac"), "2.3.2", "Format (FLAC) found in folder name.", "Format (FLAC) not found in folder name.")
 
 	if release.Has24bitTracks() {
-		log.NonCriticalResult(strings.Contains(release.Path, "24"), "2.3.2", "Folder name properly mentions the release has 24bit FLAC tracks.", "Since release seems to contain 24bit FLACs, the folder name could mention it. ")
+		log.NonCriticalResult(strings.Contains(folderName, "24"), "2.3.2", "Folder name properly mentions the release has 24bit FLAC tracks.", "Since release seems to contain 24bit FLACs, the folder name could mention it. ")
 	}
 
 	logsAndCues := fs.GetAllowedFilesByExt(release.Path, []string{".log", ".cue"})
 	if len(logsAndCues) != 0 {
-		log.NonCriticalResult(strings.Contains(release.Path, "CD"), "2.3.2", "Release contains .log/.cue files and the folder name properly mentions a CD source.", "Since release contains .log/.cue, it seems to be sourced from CD. The folder name could mention it. ")
+		log.NonCriticalResult(strings.Contains(folderName, "cd"), "2.3.2", "Release contains .log/.cue files and the folder name properly mentions a CD source.", "Since release contains .log/.cue, it seems to be sourced from CD. The folder name could mention it. ")
 	} else {
-		log.NonCriticalResult(strings.Contains(release.Path, "WEB"), "2.3.2", "Release does not contain .log/.cue files and the folder name properly mentions a WEB source.", "Since release does not .log/.cue, it is probably sources from WEB. The folder name could mention it. ")
+		log.NonCriticalResult(strings.Contains(folderName, "web"), "2.3.2", "Release does not contain .log/.cue files and the folder name properly mentions a WEB source.", "Since release does not .log/.cue, it is probably sources from WEB. The folder name could mention it. ")
 	}
 
 	return nil
