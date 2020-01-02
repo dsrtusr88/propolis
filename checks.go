@@ -27,6 +27,13 @@ var (
 )
 
 func CheckMusicFiles(release *music.Release) error {
+	err := release.CheckVendor()
+	if err != nil {
+		log.CriticalResult(err == nil, "2.1.6", "", "Could not confirm the same encoder was used: "+err.Error())
+	} else {
+		log.CriticalResult(err == nil, "2.1.6", "The same encoder was used for all tracks.", "")
+	}
+
 	isConsistent, bitDepth := release.CheckConsistentBitDepth()
 	log.NonCriticalResult(isConsistent, "2.1.6", "All files are "+bitDepth+"bit files.", "The tracks do not have the same bit depth.")
 	if !isConsistent {
@@ -54,7 +61,7 @@ func CheckMusicFiles(release *music.Release) error {
 	log.CriticalResult(len(forbidden) == 0, "2.1.6.3", "Release does not also contain other kinds of music files.", "Release also contains other music formats, possible mutt rip: "+strings.Join(forbidden, ","))
 
 	// checking flacs
-	err := release.Check()
+	err = release.Check()
 	log.CriticalResult(err == nil, "2.2.10.8", "Integrity checks for all FLACs OK, no ID3 tags detected.", "At least one track is not a valid FLAC file.")
 	if err != nil {
 		if err.Error() == music.ErrorContainsID3Tags {
