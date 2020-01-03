@@ -17,6 +17,8 @@ compiled_dev:
   artifacts:
     paths:
       - propolis
+      - propolis_darwin
+      - propolis_windows.exe
     name: "propolis-dev-${CI_COMMIT_REF_NAME}"
     expire_in: 4 weeks
   except:
@@ -32,6 +34,8 @@ compiled_release:
   artifacts:
     paths:
       - propolis
+      - propolis_darwin
+      - propolis_windows.exe
     name: "propolis-${CI_COMMIT_REF_NAME}"
   only:
     - tags
