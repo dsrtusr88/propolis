@@ -26,13 +26,10 @@ Options:
     --version              Show version.
 `
 	fullName    = "propolis"
-	fullVersion = "%s -- v%s"
-	version     = "0.1.0"
+	fullVersion = "%s -- %s"
 )
 
-func userAgent() string {
-	return fullName + "/" + version
-}
+var Version = "dev"
 
 type propolisArgs struct {
 	builtin       bool
@@ -42,7 +39,7 @@ type propolisArgs struct {
 
 func (m *propolisArgs) parseCLI(osArgs []string) error {
 	// parse arguments and options
-	args, err := docopt.Parse(fmt.Sprintf(usage, version), osArgs, true, fmt.Sprintf(fullVersion, fullName, version), false, false)
+	args, err := docopt.Parse(fmt.Sprintf(usage, Version), osArgs, true, fmt.Sprintf(fullVersion, fullName, Version), false, false)
 	if err != nil {
 		return errors.Wrap(err, "incorrect arguments")
 	}

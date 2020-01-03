@@ -1,4 +1,5 @@
 GO = GO111MODULE=on go
+VERSION=`git describe --tags`
 
 all: fmt check test-coverage build
 
@@ -30,9 +31,9 @@ clean:
 	rm -f coverage.txt
 
 build:
-	${GO} build -v -o propolis
-	GOOS=darwin GOARCH=amd64 ${GO} build -v -o propolis_darwin
-	GOOS=windows GOARCH=amd64 ${GO} build -v -o propolis_windows.exe
+	${GO} build -ldflags "-X main.Version=${VERSION}" -o propolis
+	GOOS=darwin GOARCH=amd64 ${GO} build -ldflags "-X main.Version=${VERSION}" -o propolis_darwin
+	GOOS=windows GOARCH=amd64 ${GO} build -ldflags "-X main.Version=${VERSION}" -o propolis_windows.exe
 
 install:
 	${GO} install -v ./...
