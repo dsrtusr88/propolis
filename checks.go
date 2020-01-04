@@ -116,8 +116,14 @@ func CheckTags(release *music.Release, res *Results) *Results {
 	err := release.CheckConsistentTags()
 	res.Add(log.CriticalResult(err == nil, internalRule, "Release-level tags seem consistent among tracks.", "Tracks have inconsistent tags about the release."))
 	if err != nil {
-		res.Add(log.CriticalResult(err == nil, internalRule, "", "⮕ Found "+err.Error()))
+		res.Add(log.CriticalResult(err == nil, internalRule, "", arrowHeader+"Found: "+err.Error()))
 		// TODO album title can be different in case of multidisc -- 2.3.18.3.3
+	}
+
+	err = release.CheckAlbumArtist()
+	res.Add(log.NonCriticalResult(err == nil, internalRule, "Artist/Album artist tags seem consistent.", "Artist/Album artist tags could be improved."))
+	if err != nil {
+		res.Add(log.NonCriticalResult(err == nil, internalRule, "", arrowHeader+"Found: "+err.Error()))
 	}
 
 	// check combined tags
