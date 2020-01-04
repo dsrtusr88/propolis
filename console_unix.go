@@ -2,12 +2,17 @@
 
 package main
 
+import "gitlab.com/catastrophic/assistance/ui"
+
+var (
+	titleHeader = ui.BlueBold("▻ ")
+)
+
 const (
-	titleHeader  = "⸰ "
 	arrowHeader  = "⮕ "
 	internalRule = ` -- `
-	OKString     = "🗹"
-	KOString     = "🞎"
+	OKString     = " 🗹 "
+	KOString     = " 🞎 "
 
 	integrityCheckOK = "Integrity checks successful for all FLACs, no ID3 tags detected."
 )

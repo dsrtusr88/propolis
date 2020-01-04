@@ -1,7 +1,10 @@
 package main
 
+var (
+	titleHeader = "+ "
+)
+
 const (
-	titleHeader  = "+ "
 	arrowHeader  = "-> "
 	internalRule = " -- "
 	OKString     = "OK"
