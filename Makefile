@@ -38,7 +38,7 @@ build:
 	GOOS=windows GOARCH=amd64 ${GO} build -ldflags "-X main.Version=${VERSION}" -o propolis_windows.exe
 
 install:
-	${GO} install -v ./...
+	${GO} install -ldflags "-X main.Version=${VERSION}"
 
 
 
