@@ -60,7 +60,7 @@ func CheckMusicFiles(release *music.Release, res *Results) *Results {
 
 	// checking flacs
 	err = release.Check()
-	res.Add(log.CriticalResult(err == nil, "2.2.10.8", "Integrity checks for all FLACs OK, no ID3 tags detected.", "At least one track is not a valid FLAC file."))
+	res.Add(log.CriticalResult(err == nil, "2.2.10.8", integrityCheckOK, "At least one track is not a valid FLAC file."))
 	if err != nil {
 		if err.Error() == music.ErrorContainsID3Tags {
 			res.Add(log.CriticalResult(err == nil, "2.2.10.8", "", arrowHeader+"At least one FLAC has illegal ID3 tags."))
@@ -144,7 +144,11 @@ func CheckFilenames(release *music.Release, res *Results) *Results {
 	}
 	res.Add(log.NonCriticalResult(!capitalizedExt, internalRule, "Track filenames have lower case extensions.", "At least one filename has an uppercase .FLAC extension."))
 
-	res.Add(log.CriticalResult(release.CheckTrackNumbersInFilenames(), "2.3.13", "All tracks filenames appear to contain their track number.", "At least one track filename does not contain its track number."))
+	if len(release.Flacs) != 1 {
+		res.Add(log.CriticalResult(release.CheckTrackNumbersInFilenames(), "2.3.13", "All tracks filenames appear to contain their track number.", "At least one track filename does not contain its track number."))
+	} else {
+		res.Add(log.NonCriticalResult(release.CheckTrackNumbersInFilenames(), "2.3.13", "The track filename appears to contain the track number.", "The track filename does not contain the track number. It is not required for singles, but good practice nonetheless."))
+	}
 
 	res.Add(log.CriticalResult(release.CheckFilenameContainsStartOfTitle(minTitleSize), "2.3.11", "All tracks filenames appear to contain at least the beginning of song titles.", "At least one track filename does not seem to include the beginning of the song title."))
 
