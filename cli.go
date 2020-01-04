@@ -11,7 +11,9 @@ import (
 const (
 	usage = `
 	
-	PROPOLIS (v%s)
+    ___  ____ ____ ___  ____ _    _ ____ 
+    |__] |__/ |  | |__] |  | |    | [__  
+    |    |  \ |__| |    |__| |___ | ___]  (%s)
 	
 Description:
     Make sure files are in good shape before uploading.
