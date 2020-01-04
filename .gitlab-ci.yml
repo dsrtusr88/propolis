@@ -17,6 +17,7 @@ compiled_dev:
   artifacts:
     paths:
       - propolis
+      - propolis_x86
       - propolis_darwin
       - propolis_windows.exe
     name: "propolis-dev-${CI_COMMIT_REF_NAME}"
@@ -34,6 +35,7 @@ compiled_release:
   artifacts:
     paths:
       - propolis
+      - propolis_x86
       - propolis_darwin
       - propolis_windows.exe
     name: "propolis-${CI_COMMIT_REF_NAME}"
