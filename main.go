@@ -41,7 +41,7 @@ func main() {
 	res := &Results{}
 	var err error
 
-	logthis.Info("Checking Path is a music release", logthis.NORMAL)
+	logthis.Info(ui.BlueBoldUnderlined("⸰ Checking Path is a music release"), logthis.NORMAL)
 	err = release.ParseFiles()
 	res.Add(log.CriticalResult(err == nil, "2.3.1", "Release contains FLAC files", "Error parsing files"))
 	if err != nil {
@@ -51,19 +51,19 @@ func main() {
 	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
 	res.Add(log.NeutralResult(true, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", ""))
 
-	logthis.Info("Checking music files", logthis.NORMAL)
+	logthis.Info(ui.BlueBoldUnderlined("⸰ Checking music files"), logthis.NORMAL)
 	res = CheckMusicFiles(release, res)
-	logthis.Info("Checking organization", logthis.NORMAL)
+	logthis.Info(ui.BlueBoldUnderlined("⸰ Checking organization"), logthis.NORMAL)
 	res = CheckOrganization(release, res)
-	logthis.Info("Checking tags", logthis.NORMAL)
+	logthis.Info(ui.BlueBoldUnderlined("⸰ Checking tags"), logthis.NORMAL)
 	res = CheckTags(release, res)
-	logthis.Info("Checking filenames", logthis.NORMAL)
+	logthis.Info(ui.BlueBoldUnderlined("⸰ Checking filenames"), logthis.NORMAL)
 	res = CheckFilenames(release, res)
-	logthis.Info("Checking extra files", logthis.NORMAL)
+	logthis.Info(ui.BlueBoldUnderlined("⸰ Checking extra files"), logthis.NORMAL)
 	res = CheckExtraFiles(release, res)
-	logthis.Info("Checking folder name", logthis.NORMAL)
+	logthis.Info(ui.BlueBoldUnderlined("⸰ Checking folder name"), logthis.NORMAL)
 	res = CheckFolderName(release, res)
-	logthis.Info("Generating spectrograms", logthis.NORMAL)
+	logthis.Info(ui.BlueBoldUnderlined("⸰ Generating spectrograms"), logthis.NORMAL)
 	if _, err := GenerateSpectrograms(release); err != nil {
 		logthis.Error(err, logthis.NORMAL)
 	}
