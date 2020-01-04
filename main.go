@@ -60,9 +60,10 @@ func main() {
 	logthis.Info(ui.BlueBoldUnderlined(titleHeader+"Checking folder name"), logthis.NORMAL)
 	res = CheckFolderName(release, res)
 	logthis.Info(ui.BlueBoldUnderlined(titleHeader+"Generating spectrograms"), logthis.NORMAL)
-	if _, err := GenerateSpectrograms(release); err != nil {
+	if err := GenerateSpectrograms(release); err != nil {
 		logthis.Error(err, logthis.NORMAL)
+	} else {
+		logthis.Info(ui.BlueBold("Spectrograms generated in "+metadataDir+". Check for transcodes (see wiki#408)."), logthis.NORMAL)
 	}
-	logthis.Info(ui.BlueBold("Spectrograms generated in "+metadataDir+". Check for transcodes (see wiki#408)."), logthis.NORMAL)
 	logthis.Info(ui.BlueBoldUnderlined("\nResults:\n")+ui.Blue("⮕ "+res.String()), logthis.NORMAL)
 }

@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 
 	"gitlab.com/catastrophic/assistance/fs"
 	"gitlab.com/catastrophic/assistance/music"
@@ -235,27 +234,13 @@ func CheckExtraFiles(release *music.Release, res *Results) *Results {
 	return res
 }
 
-func GenerateSpectrograms(release *music.Release) ([]string, error) {
-	var wg sync.WaitGroup
-	var combinedPNG string
-	var combinedErr error
-	// generating combinedPNG in the background
-	wg.Add(1)
-	go func() {
-		// combination of 10s slices from each song
-		combinedPNG, combinedErr = release.GenerateCombinedSpectrogram()
-		wg.Done()
-	}()
+func GenerateSpectrograms(release *music.Release) error {
 	// generating full spectrograms
-	pngs, err := release.GenerateSpectrograms(" ")
+	_, err := release.GenerateSpectrograms(fullName, true)
 	if err != nil {
-		return []string{}, err
+		return err
 	}
-	// checking combined PNG was correctly created
-	wg.Wait()
-	if combinedErr != nil {
-		return []string{}, combinedErr
-	}
-	pngs = append([]string{combinedPNG}, pngs...)
-	return pngs, nil
+	// combination of 10s slices from each song
+	_, err = release.GenerateCombinedSpectrogram(true)
+	return err
 }
