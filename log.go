@@ -8,10 +8,16 @@ import (
 )
 
 const (
+	OKString = "OK"
+	KOString = "KO"
+)
+
+const (
 	OK = iota
 	Warning
 	KO
 	Info
+	NeutralInfo
 )
 
 type Result int
@@ -42,53 +48,52 @@ type Log struct {
 }
 
 func (l *Log) CriticalResult(check bool, rule, commentOK, commentKO string) Result {
-	res := ui.BlueBold("OK")
-	comment := ui.BlueBold(commentOK)
-	if !check {
-		res = ui.RedBold("KO")
-		comment = ui.RedBold(commentKO)
-		l.log(res, rule, comment)
-		return KO
+	if check {
+		l.log(OK, OKString, rule, commentOK)
+		return OK
 	}
-	l.log(res, rule, comment)
-	return OK
+	l.log(KO, KOString, rule, commentKO)
+	return KO
 }
 
 func (l *Log) NonCriticalResult(check bool, rule, commentOK, commentKO string) Result {
-	res := ui.BlueBold("OK")
-	comment := ui.BlueBold(commentOK)
-	if !check {
-		res = ui.YellowBold("KO")
-		comment = ui.YellowBold(commentKO)
-		l.log(res, rule, comment)
-		return Warning
+	if check {
+		l.log(OK, OKString, rule, commentOK)
+		return OK
 	}
-	l.log(res, rule, comment)
-	return OK
+	l.log(Warning, KOString, rule, commentKO)
+	return Warning
 }
 
 func (l *Log) NeutralResult(check bool, rule, commentOK, commentKO string) Result {
-	res := ui.BlueBold("OK")
-	comment := ui.BlueBold(commentOK)
-	if !check {
-		res = ui.BlueBold("KO")
-		comment = ui.BlueBold(commentKO)
+	if check {
+		l.log(NeutralInfo, OKString, rule, commentOK)
+	} else {
+		l.log(NeutralInfo, KOString, rule, commentKO)
 	}
-	l.log(res, rule, comment)
-	return Info
+	return NeutralInfo
 }
 
 func (l *Log) BadResultInfo(check bool, rule, commentOK, commentKO string) Result {
-	res := ui.YellowBold("KO")
-	comment := ui.YellowBold(commentOK)
-	if !check {
-		res = ui.RedBold("KO")
-		comment = ui.RedBold(commentKO)
+	if check {
+		l.log(Warning, OKString, rule, commentOK)
+	} else {
+		l.log(KO, KOString, rule, commentKO)
 	}
-	l.log(res, rule, comment)
 	return Info
 }
 
-func (l *Log) log(res, rule, comment string) {
+func (l *Log) log(level Result, res, rule, comment string) {
+	switch {
+	case level == OK || level == NeutralInfo:
+		res = ui.BlueBold(res)
+		comment = ui.BlueBold(comment)
+	case level == Warning:
+		res = ui.YellowBold(res)
+		comment = ui.YellowBold(comment)
+	case level == KO:
+		res = ui.RedBold(res)
+		comment = ui.RedBold(comment)
+	}
 	logthis.Info(fmt.Sprintf(" %2s | %-10s | %s", res, rule, comment), logthis.NORMAL)
 }
