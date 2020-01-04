@@ -8,11 +8,6 @@ import (
 )
 
 const (
-	OKString = "OK"
-	KOString = "KO"
-)
-
-const (
 	OK = iota
 	Warning
 	KO
