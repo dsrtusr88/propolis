@@ -99,13 +99,11 @@ func CheckOrganization(release *music.Release, res *Results) *Results {
 
 	res.Add(log.CriticalResult(len(fs.GetFilesAndFoldersByPrefix(release.Path, forbiddenLeadingCharacters)) == 0, "2.3.20", "No leading space/dot found in files and folders.", "Release has files or folders with a leading space or dot."))
 
-	if release.NumberOfDiscs() > 1 {
-		err := release.CheckMultiDiscOrganization()
-		if err != nil {
-			res.Add(log.CriticalResult(err == nil, "2.3.15", "", "Tracks from this multi-disc release are incorrectly organized: "+err.Error()))
-		} else {
-			res.Add(log.CriticalResult(err == nil, "2.3.15", "Files from multiple discs are either in top folder with disc numbers in filenames, or in dedicated subfolders.", ""))
-		}
+	err := release.CheckMultiDiscOrganization()
+	if err != nil {
+		res.Add(log.CriticalResult(err == nil, "2.3.15", "", "Tracks from this multi-disc release are incorrectly organized: "+err.Error()))
+	} else {
+		res.Add(log.CriticalResult(err == nil, "2.3.15", "Release is not multi-disc, or files from multiple discs are either in top folder with disc numbers in filenames, or in dedicated subfolders.", ""))
 	}
 
 	return res
