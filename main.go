@@ -38,56 +38,35 @@ func main() {
 	// by default, metadata (spectrograms, etc), will be put in a side folder.
 	metadataDir := cli.path + " (Metadata)"
 	release := music.NewWithExternalMetadata(cli.path, metadataDir)
+	res := &Results{}
+	var err error
 
 	logthis.Info("Checking Path is a music release", logthis.NORMAL)
-	err := release.ParseFiles()
-	log.CriticalResult(err == nil, "2.3.1", "Release contains FLAC files", "Error parsing files")
+	err = release.ParseFiles()
+	res.Add(log.CriticalResult(err == nil, "2.3.1", "Release contains FLAC files", "Error parsing files"))
 	if err != nil {
-		log.BadResult(err == nil, "2.3.1", "", "⮕ Critical error: "+err.Error())
+		res.Add(log.BadResultInfo(err == nil, "2.3.1", "", "⮕ Critical error: "+err.Error()))
 		return
 	}
 	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
-	log.NeutralResult(true, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", "")
+	res.Add(log.NeutralResult(true, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", ""))
 
 	logthis.Info("Checking music files", logthis.NORMAL)
-	if err := CheckMusicFiles(release); err != nil {
-		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
-		return
-	}
-
+	res = CheckMusicFiles(release, res)
 	logthis.Info("Checking organization", logthis.NORMAL)
-	if err := CheckOrganization(release); err != nil {
-		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
-		return
-	}
-
+	res = CheckOrganization(release, res)
 	logthis.Info("Checking tags", logthis.NORMAL)
-	if err := CheckTags(release); err != nil {
-		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
-		return
-	}
-
+	res = CheckTags(release, res)
 	logthis.Info("Checking filenames", logthis.NORMAL)
-	if err := CheckFilenames(release); err != nil {
-		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
-		return
-	}
-
+	res = CheckFilenames(release, res)
 	logthis.Info("Checking extra files", logthis.NORMAL)
-	if err := CheckExtraFiles(release); err != nil {
-		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
-		return
-	}
-
+	res = CheckExtraFiles(release, res)
 	logthis.Info("Checking folder name", logthis.NORMAL)
-	if err := CheckFolderName(release); err != nil {
-		log.BadResult(err == nil, internalRule, "", "⮕ Critical error: "+err.Error())
-		return
-	}
-
+	res = CheckFolderName(release, res)
 	logthis.Info("Generating spectrograms", logthis.NORMAL)
 	if _, err := GenerateSpectrograms(release); err != nil {
 		logthis.Error(err, logthis.NORMAL)
 	}
 	logthis.Info(ui.BlueBold("Spectrograms generated in "+metadataDir), logthis.NORMAL)
+	logthis.Info(ui.BlueBoldUnderlined("\nResults:\n")+ui.Blue("⮕ "+res.String()), logthis.NORMAL)
 }
