@@ -60,12 +60,16 @@ func main() {
 	res = CheckExtraFiles(release, res)
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined("Checking folder name"), logthis.NORMAL)
 	res = CheckFolderName(release, res)
-	logthis.Info(titleHeader+ui.BlueBoldUnderlined("Generating spectrograms"), logthis.NORMAL)
-	if err := GenerateSpectrograms(release); err != nil {
-		logthis.Error(err, logthis.NORMAL)
-	} else {
-		logthis.Info(ui.BlueBold("Spectrograms generated in "+metadataDir+". Check for transcodes (see wiki#408)."), logthis.NORMAL)
+
+	if !cli.disableSpecs {
+		logthis.Info(titleHeader+ui.BlueBoldUnderlined("Generating spectrograms"), logthis.NORMAL)
+		if err := GenerateSpectrograms(release); err != nil {
+			logthis.Error(err, logthis.NORMAL)
+		} else {
+			logthis.Info(ui.BlueBold("Spectrograms generated in "+metadataDir+". Check for transcodes (see wiki#408)."), logthis.NORMAL)
+		}
 	}
+
 	logthis.Info("\n"+titleHeader+ui.BlueBoldUnderlined("Results\n")+ui.Blue(res.String()), logthis.NORMAL)
 
 	// returning nonzero exit status if something serious was found

@@ -20,12 +20,12 @@ Description:
     Detect trumpable releases.
 	
 Usage:
-    propolis [-c|--check-for-dupes] <PATH>
+    propolis [--no-specs] <PATH>
 
 Options:
-    -c, --check-for-dupes  Check the tracker for duplicates.
-    -h, --help             Show this screen.
-    --version              Show version.
+    --no-specs       Disable spectrograms generation.
+    -h, --help       Show this screen.
+    --version        Show version.
 `
 	fullName    = "propolis"
 	fullVersion = "%s -- %s"
@@ -34,9 +34,9 @@ Options:
 var Version = "dev"
 
 type propolisArgs struct {
-	builtin       bool
-	checkForDupes bool
-	path          string
+	builtin      bool
+	disableSpecs bool
+	path         string
 }
 
 func (m *propolisArgs) parseCLI(osArgs []string) error {
@@ -50,7 +50,7 @@ func (m *propolisArgs) parseCLI(osArgs []string) error {
 		m.builtin = true
 		return nil
 	}
-	m.checkForDupes = args["--check-for-dupes"].(bool)
+	m.disableSpecs = args["--no-specs"].(bool)
 	m.path = args["<PATH>"].(string)
 	if !fs.DirExists(m.path) {
 		return errors.New("target path " + m.path + " not found")
