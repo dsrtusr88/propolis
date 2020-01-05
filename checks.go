@@ -65,7 +65,7 @@ func CheckMusicFiles(release *music.Release, res *Results) *Results {
 		if err.Error() == music.ErrorContainsID3Tags {
 			res.Add(log.CriticalResult(err == nil, "2.2.10.8", "", arrowHeader+"At least one FLAC has illegal ID3 tags."))
 		} else {
-			res.Add(log.CriticalResult(err == nil, internalRule, "", arrowHeader+"At least one FLAC has failed an integrity test."))
+			res.Add(log.CriticalResult(err == nil, internalRule, "", arrowHeader+"At least one FLAC has failed an integrity test: "+err.Error()))
 		}
 	}
 
