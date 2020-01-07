@@ -56,22 +56,22 @@ func (l *Log) NonCriticalResult(check bool, rule, commentOK, commentKO string) R
 		l.log(OK, OKString, rule, commentOK)
 		return OK
 	}
-	l.log(Warning, KOString, rule, commentKO)
+	l.log(Warning, WarningString, rule, commentKO)
 	return Warning
 }
 
 func (l *Log) NeutralResult(check bool, rule, commentOK, commentKO string) Result {
 	if check {
-		l.log(NeutralInfo, OKString, rule, commentOK)
+		l.log(NeutralInfo, NeutralString, rule, commentOK)
 	} else {
-		l.log(NeutralInfo, KOString, rule, commentKO)
+		l.log(NeutralInfo, WarningString, rule, commentKO)
 	}
 	return NeutralInfo
 }
 
 func (l *Log) BadResultInfo(check bool, rule, commentOK, commentKO string) Result {
 	if check {
-		l.log(Warning, OKString, rule, commentOK)
+		l.log(Warning, WarningString, rule, commentOK)
 	} else {
 		l.log(KO, KOString, rule, commentKO)
 	}

@@ -9,10 +9,12 @@ var (
 )
 
 const (
-	arrowHeader  = "⮕ "
-	internalRule = ` -- `
-	OKString     = " 🗹 "
-	KOString     = " 🞎 "
+	arrowHeader   = "⮕ "
+	internalRule  = ` -- `
+	OKString      = " 🗹 "
+	KOString      = " 🗷 "
+	WarningString = " 🞎 "
+	NeutralString = " 🛈 "
 
 	integrityCheckOK = "Integrity checks successful for all FLACs, no ID3 tags detected."
 )
