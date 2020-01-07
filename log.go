@@ -42,7 +42,7 @@ type Log struct {
 	logthis.LogThis
 }
 
-func (l *Log) CriticalResult(check bool, rule, commentOK, commentKO string) Result {
+func (l *Log) Critical(check bool, rule, commentOK, commentKO string) Result {
 	if check {
 		l.log(OK, OKString, rule, commentOK)
 		return OK
@@ -51,7 +51,7 @@ func (l *Log) CriticalResult(check bool, rule, commentOK, commentKO string) Resu
 	return KO
 }
 
-func (l *Log) NonCriticalResult(check bool, rule, commentOK, commentKO string) Result {
+func (l *Log) NonCritical(check bool, rule, commentOK, commentKO string) Result {
 	if check {
 		l.log(OK, OKString, rule, commentOK)
 		return OK
@@ -60,7 +60,7 @@ func (l *Log) NonCriticalResult(check bool, rule, commentOK, commentKO string) R
 	return Warning
 }
 
-func (l *Log) NeutralResult(check bool, rule, commentOK, commentKO string) Result {
+func (l *Log) Info(check bool, rule, commentOK, commentKO string) Result {
 	if check {
 		l.log(NeutralInfo, NeutralString, rule, commentOK)
 	} else {
@@ -69,7 +69,7 @@ func (l *Log) NeutralResult(check bool, rule, commentOK, commentKO string) Resul
 	return NeutralInfo
 }
 
-func (l *Log) BadResultInfo(check bool, rule, commentOK, commentKO string) Result {
+func (l *Log) BadResult(check bool, rule, commentOK, commentKO string) Result {
 	if check {
 		l.log(Warning, WarningString, rule, commentOK)
 	} else {

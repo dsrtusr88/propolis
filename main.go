@@ -40,13 +40,13 @@ func main() {
 
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined("Checking Path is a music release"), logthis.NORMAL)
 	err = release.ParseFiles()
-	res.Add(log.CriticalResult(err == nil, "2.3.1", "Release contains FLAC files", "Error parsing files"))
+	res.Add(log.Critical(err == nil, "2.3.1", "Release contains FLAC files", "Error parsing files"))
 	if err != nil {
-		res.Add(log.BadResultInfo(err == nil, "2.3.1", "", arrowHeader+"Critical error: "+err.Error()))
+		res.Add(log.BadResult(err == nil, "2.3.1", "", arrowHeader+"Critical error: "+err.Error()))
 		return
 	}
 	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
-	res.Add(log.NeutralResult(true, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", ""))
+	res.Add(log.Info(true, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", ""))
 
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined("Checking music files"), logthis.NORMAL)
 	res = CheckMusicFiles(release, res)
