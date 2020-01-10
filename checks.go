@@ -72,8 +72,12 @@ func CheckMusicFiles(release *music.Release, res *Results) *Results {
 	// checking for uncompressed flacs
 	err = release.CheckCompression()
 	res.Add(log.Critical(err == nil, "2.2.10.10", "First track does not seem to be uncompressed FLAC.", "Error checking for uncompressed FLAC."))
-	if err != nil && err.Error() == music.ErrorUncompressed {
-		res.Add(log.Critical(err == nil, "2.2.10.10", "", arrowHeader+"The first track is uncompressed FLAC."))
+	if err != nil {
+		if err.Error() == music.ErrorUncompressed {
+			res.Add(log.Critical(err == nil, "2.2.10.10", "", arrowHeader+"The first track is uncompressed FLAC."))
+		} else {
+			res.Add(log.BadResult(err == nil, "2.2.10.10", "", arrowHeader+err.Error()))
+		}
 	}
 	return res
 }
