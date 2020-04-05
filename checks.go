@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"path/filepath"
 	"strconv"
 	"strings"
 
+	"gitlab.com/catastrophic/assistance/flac"
 	"gitlab.com/catastrophic/assistance/fs"
 	"gitlab.com/catastrophic/assistance/music"
 	"gitlab.com/catastrophic/assistance/strslice"
@@ -62,7 +64,7 @@ func CheckMusicFiles(release *music.Release, res *Results) *Results {
 	err = release.Check()
 	res.Add(log.Critical(err == nil, "2.2.10.8", integrityCheckOK, "At least one track is not a valid FLAC file."))
 	if err != nil {
-		if err.Error() == music.ErrorContainsID3Tags {
+		if err == flac.ErrNoFlacHeader {
 			res.Add(log.Critical(err == nil, "2.2.10.8", "", arrowHeader+"At least one FLAC has illegal ID3 tags."))
 		} else {
 			res.Add(log.Critical(err == nil, internalRule, "", arrowHeader+"At least one FLAC has failed an integrity test: "+err.Error()))
@@ -73,7 +75,7 @@ func CheckMusicFiles(release *music.Release, res *Results) *Results {
 	err = release.CheckCompression()
 	res.Add(log.Critical(err == nil, "2.2.10.10", "First track does not seem to be uncompressed FLAC.", "Error checking for uncompressed FLAC."))
 	if err != nil {
-		if err.Error() == music.ErrorUncompressed {
+		if errors.Is(err, flac.ErrorUncompressed) {
 			res.Add(log.Critical(err == nil, "2.2.10.10", "", arrowHeader+"The first track is uncompressed FLAC."))
 		} else {
 			res.Add(log.BadResult(err == nil, "2.2.10.10", "", arrowHeader+err.Error()))
@@ -145,7 +147,7 @@ func CheckFilenames(release *music.Release, res *Results) *Results {
 
 	var capitalizedExt bool
 	for _, f := range release.Flacs {
-		if filepath.Ext(f.Filename) == ".FLAC" {
+		if filepath.Ext(f.Path) == ".FLAC" {
 			capitalizedExt = true
 			break
 		}
@@ -179,14 +181,15 @@ func CheckFolderName(release *music.Release, res *Results) *Results {
 	folderName := strings.ToLower(filepath.Base(release.Path))
 
 	// getting metadata
-	title := release.Flacs[0].Tags.Album
+	tags := release.Flacs[0].CommonTags()
+	title := tags.Album
 	res.Add(log.Critical(strings.Contains(folderName, strings.ToLower(title)), "2.3.2", "Title of album is in folder name.", "Title of album (as found in the tags of the first track) is not in the folder name."))
 
-	artists := release.Flacs[0].Tags.AlbumArtist
+	artists := tags.AlbumArtist
 	if len(artists) == 0 {
 		// no album artist found, falling back to artists
 		for _, f := range release.Flacs {
-			artists = append(artists, f.Tags.Artist...)
+			artists = append(artists, f.CommonTags().Artist...)
 		}
 		strslice.RemoveDuplicates(&artists)
 	}
@@ -203,8 +206,8 @@ func CheckFolderName(release *music.Release, res *Results) *Results {
 
 	res.Add(log.NonCritical(len(artists) == artistsFound, "2.3.2", "All album artists found in folder name.", "Not all (if any) album artists (as found in the tags of the first track) found in the folder name."))
 
-	year := release.Flacs[0].Tags.Year
-	date := release.Flacs[0].Tags.Date
+	year := tags.Year
+	date := tags.Date
 	if year != "" || date != "" {
 		var foundYear, foundDate bool
 		if year != "" {

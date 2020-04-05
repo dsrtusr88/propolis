@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"strconv"
 	"syscall"
 
+	"gitlab.com/catastrophic/assistance/flac"
 	"gitlab.com/catastrophic/assistance/fs"
 	"gitlab.com/catastrophic/assistance/logthis"
 	"gitlab.com/catastrophic/assistance/music"
@@ -42,7 +44,11 @@ func main() {
 	err = release.ParseFiles()
 	res.Add(log.Critical(err == nil, "2.3.1", "Release contains FLAC files", "Error parsing files"))
 	if err != nil {
-		res.Add(log.BadResult(err == nil, "2.3.1", "", arrowHeader+"Critical error: "+err.Error()))
+		if errors.Is(err, flac.ErrNoFlacHeader) {
+			res.Add(log.Critical(err == nil, "2.2.10.8", "", arrowHeader+"At least one FLAC has illegal ID3v2 tags."))
+		} else {
+			res.Add(log.BadResult(err == nil, "2.3.1", "", arrowHeader+"Critical error: "+err.Error()))
+		}
 		return
 	}
 	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
