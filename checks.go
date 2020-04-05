@@ -70,6 +70,9 @@ func CheckMusicFiles(release *music.Release, res *Results) *Results {
 			res.Add(log.Critical(err == nil, internalRule, "", arrowHeader+"At least one FLAC has failed an integrity test: "+err.Error()))
 		}
 	}
+	// checking for id3v1 tags
+	err = release.CheckForID3v1Tags()
+	res.Add(log.NonCritical(err == nil, internalRule, "No ID3v1 tags detected in the first track.", "The first track contains ID3v1 tags at the end of the file."))
 
 	// checking for uncompressed flacs
 	err = release.CheckCompression()
