@@ -29,9 +29,9 @@ var (
 func CheckMusicFiles(release *music.Release, res *Results) *Results {
 	err := release.CheckVendor()
 	if err != nil {
-		res.Add(log.Critical(err == nil, "2.1.6", "", "Could not confirm the same encoder was used: "+err.Error()))
+		res.Add(log.NonCritical(err == nil, "2.1.6", "", "Could not confirm the same encoder was used: "+err.Error()))
 	} else {
-		res.Add(log.Critical(err == nil, "2.1.6", "The same encoder was used for all tracks.", ""))
+		res.Add(log.NonCritical(err == nil, "2.1.6", "The same encoder was used for all tracks.", ""))
 	}
 
 	isConsistent, bitDepth := release.CheckConsistentBitDepth()
