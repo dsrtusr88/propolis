@@ -19,10 +19,11 @@ Description:
     Detect trumpable releases.
 	
 Usage:
-    propolis [--no-specs] <PATH>
+    propolis [--no-specs] [--only-problems] <PATH>
 
 Options:
     --no-specs       Disable spectrograms generation.
+    --only-problems  Only show problems (warnings & errors).
     -h, --help       Show this screen.
     --version        Show version.
 `
@@ -35,6 +36,7 @@ var Version = "dev"
 type propolisArgs struct {
 	builtin      bool
 	disableSpecs bool
+	problemsOnly bool
 	path         string
 }
 
@@ -50,6 +52,7 @@ func (m *propolisArgs) parseCLI(osArgs []string) error {
 		return nil
 	}
 	m.disableSpecs = args["--no-specs"].(bool)
+	m.problemsOnly = args["--only-problems"].(bool)
 	m.path = args["<PATH>"].(string)
 	if !fs.DirExists(m.path) {
 		return errors.New("target path " + m.path + " not found")

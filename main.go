@@ -33,6 +33,8 @@ func main() {
 	if cli.builtin {
 		return
 	}
+	// setting output config
+	log.problemsOnly = cli.problemsOnly
 
 	// by default, metadata (spectrograms, etc), will be put in a side folder.
 	metadataDir := cli.path + " (Metadata)"

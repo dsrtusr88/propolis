@@ -9,10 +9,10 @@ import (
 
 const (
 	OK = iota
-	Warning
-	KO
 	Info
 	NeutralInfo
+	Warning
+	KO
 )
 
 type Result int
@@ -40,6 +40,7 @@ func (r *Results) String() string {
 
 type Log struct {
 	logthis.LogThis
+	problemsOnly bool
 }
 
 func (l *Log) Critical(check bool, rule, commentOK, commentKO string) Result {
@@ -66,6 +67,7 @@ func (l *Log) Info(check bool, rule, commentOK, commentKO string) Result {
 	} else {
 		l.log(NeutralInfo, WarningString, rule, commentKO)
 	}
+
 	return NeutralInfo
 }
 
@@ -90,5 +92,7 @@ func (l *Log) log(level Result, res, rule, comment string) {
 		res = ui.RedBold(res)
 		comment = ui.RedBold(comment)
 	}
-	logthis.Info(fmt.Sprintf(" %2s | %-10s | %s", res, rule, comment), logthis.NORMAL)
+	if !l.problemsOnly || (level == Warning || level == KO) {
+		logthis.Info(fmt.Sprintf(" %2s | %-10s | %s", res, rule, comment), logthis.NORMAL)
+	}
 }
