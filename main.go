@@ -19,7 +19,7 @@ var (
 
 func main() {
 	// checking external tools
-	if err := checkExternalBinaries("sox", "flac", "metaflac"); err != nil {
+	if err := checkExternalBinaries("sox", "flac"); err != nil {
 		logthis.Error(err, logthis.NORMAL)
 		return
 	}
