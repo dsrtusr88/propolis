@@ -120,7 +120,8 @@ func CheckOrganization(release *music.Release, res *Results) *Results {
 
 func CheckTags(release *music.Release, res *Results) *Results {
 	res.Add(log.Critical(release.CheckTags() == nil, "2.3.16.1/4", "All tracks have at least the required tags.", "At least one tracks is missing required tags."))
-	res.Add(log.Critical(release.CheckMaxCoverSize() <= 1024*1024, "2.3.19", "All tracks either have no embedded art, or the embedded art size is less than 1024KiB.", "At least one track has embedded art exceeding the maximum allowed size of 1024 KiB."))
+	res.Add(log.NonCritical(release.CheckMaxMetadataSize(1024*1024) == nil, internalRule, "All tracks have metadata blocks of a total size smaller then 1024 KiB.", "At least one track has metadata blocks of a total size bigger than 1024 KiB, probably due to excessive padding, embedded art, or more exotic things."))
+	res.Add(log.Critical(release.CheckMaxCoverAndPaddingSize() <= 1024*1024, "2.3.19", "All tracks either have no embedded art, or the embedded art size is less than 1024KiB (padding included).", "At least one track has embedded art and padding exceeding the maximum allowed size of 1024 KiB."))
 
 	err := release.CheckConsistentTags()
 	res.Add(log.Critical(err == nil, internalRule, "Release-level tags seem consistent among tracks.", "Tracks have inconsistent tags about the release."))
