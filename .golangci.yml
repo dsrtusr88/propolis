@@ -28,3 +28,8 @@ linters:
     - dogsled
     - gocognit
     - unparam # re-enable later
+    - testpackage
+    - gomnd
+    - goerr113
+    - nestif
+    - gochecknoinits

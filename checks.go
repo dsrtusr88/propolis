@@ -264,5 +264,4 @@ func GenerateSpectrograms(release *music.Release) (string, error) {
 	}
 	// combination of 10s slices from each song
 	return release.GenerateCombinedSpectrogram(true)
-
 }

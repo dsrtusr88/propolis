@@ -26,6 +26,7 @@ test-coverage:
 
 clean:
 	rm -f propolis
+	rm -f propolis-bot
 	rm -f propolis_x86
 	rm -f propolis_darwin
 	rm -f propolis_windows.exe
@@ -36,6 +37,9 @@ build:
 	cd cmd/propolis;GOARCH=386 ${GO} build -ldflags "-X main.Version=${VERSION}" -o ../../propolis_x86;cd ../..
 	cd cmd/propolis;GOOS=darwin GOARCH=amd64 ${GO} build -ldflags "-X main.Version=${VERSION}" -o ../../propolis_darwin;cd ../..
 	cd cmd/propolis;GOOS=windows GOARCH=amd64 ${GO} build -ldflags "-X main.Version=${VERSION}" -o ../../propolis_windows.exe;cd ../..
+
+build-bot:
+	cd cmd/propolis-bot;${GO} build -trimpath -ldflags "-X main.Version=${VERSION}" -o ../../propolis-bot;cd ../..
 
 install:
 	cd cmd/propolis;${GO} install -ldflags "-X main.Version=${VERSION}";cd ../..

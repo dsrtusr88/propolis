@@ -1,0 +1,13 @@
+general:
+  log_level: 3
+
+irc:
+  server: irc.server.net:6697
+  ssl: true
+  key: kkeeyy                     # tracker user IRC key
+  nickserv_password: something    # nickserv password used when bot_name was registered
+  username : user
+  bot_name: mybot                 # the actual user will be the tracker user
+  gatekeeper: Bee                 # drone
+  channel: "#beeees"
+
