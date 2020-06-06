@@ -1,4 +1,4 @@
-package main
+package propolis
 
 import (
 	"fmt"
@@ -18,24 +18,24 @@ const (
 type Result int
 
 type Results struct {
-	ok      int
-	warning int
-	ko      int
+	OK      int
+	Warning int
+	KO      int
 }
 
 func (r *Results) Add(res Result) {
 	switch res {
 	case OK:
-		r.ok++
+		r.OK++
 	case Warning:
-		r.warning++
+		r.Warning++
 	case KO:
-		r.ko++
+		r.KO++
 	}
 }
 
 func (r *Results) String() string {
-	return fmt.Sprintf("%d checks OK, %d checks KO, and %d warnings.", r.ok, r.ko, r.warning)
+	return fmt.Sprintf("%d checks OK, %d checks KO, and %d warnings.", r.OK, r.KO, r.Warning)
 }
 
 type Log struct {

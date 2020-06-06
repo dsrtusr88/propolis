@@ -1,4 +1,4 @@
-package main
+package propolis
 
 import (
 	"os/exec"
@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func checkExternalBinaries(externalBinaries ...string) error {
+func CheckExternalBinaries(externalBinaries ...string) error {
 	// check the required binaries are installed
 	for _, r := range externalBinaries {
 		_, err := exec.LookPath(r)

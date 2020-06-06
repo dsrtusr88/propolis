@@ -1,4 +1,4 @@
-package main
+package propolis
 
 import (
 	"errors"
@@ -87,7 +87,7 @@ func CheckMusicFiles(release *music.Release, res *Results) *Results {
 	return res
 }
 
-func CheckOrganization(release *music.Release, res *Results) *Results {
+func CheckOrganization(release *music.Release, snatched bool, res *Results) *Results {
 	notTooLong := fs.GetMaxPathLength(release.Path) < 180
 	res.Add(log.Critical(notTooLong, "2.3.12", "Maximum character length is less than 180 characters.", "Maximum character length exceeds 180 characters."))
 	if !notTooLong {
@@ -97,6 +97,9 @@ func CheckOrganization(release *music.Release, res *Results) *Results {
 	}
 
 	// checking for only allowed extensions are used
+	if snatched {
+		allowedExtensions = append(allowedExtensions, ".json")
+	}
 	forbidden := fs.GetForbiddenFilesByExt(release.Path, allowedExtensions)
 	res.Add(log.Critical(len(forbidden) == 0, "wiki#371", "Release only contains allowed extensions. ", "Release contains forbidden extensions, which would be rejected by upload.php."))
 	if len(forbidden) != 0 {
@@ -253,13 +256,13 @@ func CheckExtraFiles(release *music.Release, res *Results) *Results {
 	return res
 }
 
-func GenerateSpectrograms(release *music.Release) error {
+func GenerateSpectrograms(release *music.Release) (string, error) {
 	// generating full spectrograms
-	_, err := release.GenerateSpectrograms(fullName, true)
+	_, err := release.GenerateSpectrograms("propolis", true)
 	if err != nil {
-		return err
+		return "", err
 	}
 	// combination of 10s slices from each song
-	_, err = release.GenerateCombinedSpectrogram(true)
-	return err
+	return release.GenerateCombinedSpectrogram(true)
+
 }

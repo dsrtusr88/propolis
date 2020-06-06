@@ -32,13 +32,13 @@ clean:
 	rm -f coverage.txt
 
 build:
-	CGO_ENABLED=0 ${GO} build -ldflags "-X main.Version=${VERSION}" -o propolis
-	GOARCH=386 ${GO} build -ldflags "-X main.Version=${VERSION}" -o propolis_x86
-	GOOS=darwin GOARCH=amd64 ${GO} build -ldflags "-X main.Version=${VERSION}" -o propolis_darwin
-	GOOS=windows GOARCH=amd64 ${GO} build -ldflags "-X main.Version=${VERSION}" -o propolis_windows.exe
+	cd cmd/propolis;${GO} build -trimpath -ldflags "-X main.Version=${VERSION}" -o ../../propolis;cd ../..
+	cd cmd/propolis;GOARCH=386 ${GO} build -ldflags "-X main.Version=${VERSION}" -o ../../propolis_x86;cd ../..
+	cd cmd/propolis;GOOS=darwin GOARCH=amd64 ${GO} build -ldflags "-X main.Version=${VERSION}" -o ../../propolis_darwin;cd ../..
+	cd cmd/propolis;GOOS=windows GOARCH=amd64 ${GO} build -ldflags "-X main.Version=${VERSION}" -o ../../propolis_windows.exe;cd ../..
 
 install:
-	${GO} install -ldflags "-X main.Version=${VERSION}"
+	cd cmd/propolis;${GO} install -ldflags "-X main.Version=${VERSION}";cd ../..
 
 
 

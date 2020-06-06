@@ -1,6 +1,6 @@
 // +build darwin dragonfly freebsd linux netbsd openbsd solaris
 
-package main
+package propolis
 
 import "gitlab.com/catastrophic/assistance/ui"
 
