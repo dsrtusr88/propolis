@@ -4,14 +4,19 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/pkg/errors"
 	"gitlab.com/catastrophic/assistance/logthis"
 )
 
 type ConfigGeneral struct {
-	LogLevel int `yaml:"log_level"`
+	LogLevel      int    `yaml:"log_level"`
+	PrivateBinURL string `yaml:"privatebin_url"`
 }
 
 func (cg *ConfigGeneral) check() error {
+	if cg.PrivateBinURL == "" {
+		return errors.New("privatebin URL required")
+	}
 	return logthis.CheckLevel(cg.LogLevel)
 }
 

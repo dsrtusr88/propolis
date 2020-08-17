@@ -1,4 +1,5 @@
-GO = GO111MODULE=on go
+GO = GO111MODULE=on CGO_ENABLED=0 go
+GOTEST = GO111MODULE=on go
 VERSION=`git describe --tags`
 
 all: fmt check test-coverage build
@@ -22,7 +23,7 @@ info: fmt
 	golocc .
 
 test-coverage:
-	${GO} test -race -coverprofile=coverage.txt -covermode=atomic ./...
+	${GOTEST} test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
 clean:
 	rm -f propolis

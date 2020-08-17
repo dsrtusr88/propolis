@@ -1,5 +1,6 @@
 general:
   log_level: 3
+  privatebin_url: https://privatebin.url
 
 irc:
   server: irc.server.net:6697
