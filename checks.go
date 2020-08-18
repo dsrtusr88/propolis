@@ -2,6 +2,7 @@ package propolis
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -12,87 +13,68 @@ import (
 	"gitlab.com/catastrophic/assistance/strslice"
 )
 
-const (
-	minTitleSize = 10
-)
-
-var (
-	// https://redacted.ch/wiki.php?action=article&id=371
-	allowedExtensions      = []string{".ac3", ".accurip", ".azw3", ".chm", ".cue", ".djv", ".djvu", ".doc", ".dmg", ".dts", ".epub", ".ffp", ".flac", ".gif", ".htm", ".html", ".jpeg", ".jpg", ".lit", ".log", ".m3u", ".m3u8", ".m4a", ".m4b", ".md5", ".mobi", ".mp3", ".mp4", ".nfo", ".pdf", ".pls", ".png", ".rtf", ".sfv", ".txt"}
-	nonFlacMusicExtensions = []string{".ac3", ".dts", ".m4a", ".m4b", ".mp3", ".mp4", ".aac", ".alac", ".ogg", ".opus"}
-	nonMusicExtensions     = []string{".accurip", ".azw3", ".chm", ".cue", ".djv", ".djvu", ".doc", ".dmg", ".epub", ".ffp", ".gif", ".htm", ".html", ".jpeg", ".jpg", ".lit", ".log", ".m3u", ".m3u8", ".md5", ".mobi", ".nfo", ".pdf", ".pls", ".png", ".rtf", ".sfv", ".txt"}
-
-	forbiddenCharacters        = []string{":", "*", `\`, "?", `"`, `<`, `>`, "|", "$", "`"}
-	forbiddenLeadingCharacters = []string{" ", "."}
-)
-
-func CheckMusicFiles(release *music.Release, res *Results) *Results {
+func CheckMusicFiles(release *music.Release, res *Propolis) *Propolis {
+	// running the checks
 	err := release.CheckVendor()
-	if err != nil {
-		res.Add(log.NonCritical(err == nil, "2.1.6", "", "Could not confirm the same encoder was used: "+err.Error()))
-	} else {
-		res.Add(log.NonCritical(err == nil, "2.1.6", "The same encoder was used for all tracks.", ""))
-	}
+	res.ErrorCheck(LevelWarning, "2.1.6", OKSameEncoder, KOSameEncoder, err, AppendError)
 
 	isConsistent, bitDepth := release.CheckConsistentBitDepth()
-	res.Add(log.NonCritical(isConsistent, "2.1.6", "All files are "+bitDepth+"bit files.", "The tracks do not have the same bit depth."))
+	res.ConditionCheck(LevelWarning, "2.1.6", fmt.Sprintf(OKSameBitDepth, bitDepth), KOSameBitDepth, isConsistent)
 	if !isConsistent {
-		res.Add(log.BadResult(release.Has24bitTracks(), "2.1.6.2", arrowHeader+"At least one track is 24bit FLAC when the rest is 16bit, acceptable for some WEB releases.", arrowHeader+"Inconsistent bit depths but no 24bit track."))
+		res.ConditionCheck(LevelAwful, "2.1.6.2", arrowHeader+OKOne24bitTrack, arrowHeader+KOOne24bitTrack, release.Has24bitTracks())
 		// TODO check inconsistent but > 24bit
 	} else {
 		bitD, _ := strconv.Atoi(bitDepth)
-		res.Add(log.Critical(bitD <= 24, "2.1.1", arrowHeader+"All bit depths are less than 24bit. ", arrowHeader+"Bit depths exceeding maximum of 24."))
+		res.ConditionCheck(LevelCritical, "2.1.1", arrowHeader+OKValidBitDepth, arrowHeader+KOValidBitDepth, bitD <= 24)
 	}
 
 	isConsistent, sampleRate := release.CheckConsistentSampleRate()
-	res.Add(log.NonCritical(isConsistent, "2.1.6", "All files have a sample rate of "+sampleRate+"Hz.", "Release has a mix of sample rates, acceptable for some WEB releases (2.1.6.2)."))
-	if isConsistent {
-		sr, _ := strconv.Atoi(sampleRate)
-		res.Add(log.Critical(sr <= 192000, "2.1.1", arrowHeader+"All sample rates are less than or equal to 192kHz.", arrowHeader+"Sample rates exceeding maximum of 192kHz."))
-	}
-	// TODO if !consistent, check highest sample rate
+	res.ConditionCheck(LevelWarning, "2.1.6", fmt.Sprintf(OKSameSampleRate, sampleRate), KOSameSampleRate, isConsistent)
+	sr, _ := strconv.Atoi(sampleRate)
+	res.ConditionCheck(LevelCritical, "2.1.1", arrowHeader+OKValidSampleRate, arrowHeader+KOValidSampleRate, sr <= 192000)
 
 	// NOTE: is the rule track-by-track or on average in the release? what about the stupid "silent" tracks in some releases before a hidden song?
 	minAvgBitRate, maxAvgBitRate := release.CheckMinMaxBitrates()
-	res.Add(log.Critical(minAvgBitRate > 192000, "2.1.3", "All tracks have at least 192kbps bitrate (between "+strconv.Itoa(minAvgBitRate/1000)+"kbps and "+strconv.Itoa(maxAvgBitRate/1000)+"kbps).", "At least one file has a lower than 192kbps bit rate: "+strconv.Itoa(minAvgBitRate)))
+	res.ConditionCheck(LevelCritical, "2.1.3", "All tracks have at least 192kbps bitrate (between "+strconv.Itoa(minAvgBitRate/1000)+"kbps and "+strconv.Itoa(maxAvgBitRate/1000)+"kbps).", "At least one file has a lower than 192kbps bit rate: "+strconv.Itoa(minAvgBitRate), minAvgBitRate > 192000)
 
 	// checking for mutt rip
 	forbidden := fs.GetAllowedFilesByExt(release.Path, nonFlacMusicExtensions)
-	res.Add(log.Critical(len(forbidden) == 0, "2.1.6.3", "Release does not also contain other kinds of music files.", "Release also contains other music formats, possible mutt rip: "+strings.Join(forbidden, ",")))
+	res.ConditionCheck(LevelCritical, "2.1.6.3", OKMuttRip, fmt.Sprintf(KOMuttRip, strings.Join(forbidden, ",")), len(forbidden) == 0)
 
 	// checking flacs
 	err = release.Check()
-	res.Add(log.Critical(err == nil, "2.2.10.8", integrityCheckOK, "At least one track is not a valid FLAC file."))
+	res.ErrorCheck(LevelCritical, "2.2.10.8", integrityCheckOK, KOIntegrityCheck, err, DoNotAppendError)
 	if err != nil {
-		if err == flac.ErrNoFlacHeader {
-			res.Add(log.Critical(err == nil, "2.2.10.8", "", arrowHeader+"At least one FLAC has illegal ID3 tags."))
+		if errors.Is(err, flac.ErrNoFlacHeader) {
+			res.ErrorCheck(LevelCritical, "2.2.10.8", "", arrowHeader+KOID3Tags, err, AppendError)
 		} else {
-			res.Add(log.Critical(err == nil, internalRule, "", arrowHeader+"At least one FLAC has failed an integrity test: "+err.Error()))
+			res.ErrorCheck(LevelCritical, internalRule, "", arrowHeader+KOIntegrity, err, AppendError)
 		}
 	}
+
 	// checking for id3v1 tags
 	err = release.CheckForID3v1Tags()
-	res.Add(log.NonCritical(err == nil, internalRule, "No ID3v1 tags detected in the first track.", "The first track contains ID3v1 tags at the end of the file."))
+	res.ErrorCheck(LevelWarning, internalRule, "No ID3v1 tags detected in the first track.", "The first track contains ID3v1 tags at the end of the file.", err, AppendError)
 
 	// checking for uncompressed flacs
 	err = release.CheckCompression()
-	res.Add(log.Critical(err == nil, "2.2.10.10", "First track does not seem to be uncompressed FLAC.", "Error checking for uncompressed FLAC."))
+	res.ErrorCheck(LevelCritical, "2.2.10.10", "First track does not seem to be uncompressed FLAC.", "Error checking for uncompressed FLAC.", err, DoNotAppendError)
 	if err != nil {
 		if errors.Is(err, flac.ErrorUncompressed) {
-			res.Add(log.Critical(err == nil, "2.2.10.10", "", arrowHeader+"The first track is uncompressed FLAC."))
+			res.ErrorCheck(LevelCritical, "2.2.10.10", "", arrowHeader+"The first track is uncompressed FLAC", err, AppendError)
 		} else {
-			res.Add(log.BadResult(err == nil, "2.2.10.10", "", arrowHeader+err.Error()))
+			res.ErrorCheck(LevelCritical, "2.2.10.10", "", arrowHeader+"Other error", err, AppendError)
 		}
 	}
 	return res
 }
 
-func CheckOrganization(release *music.Release, snatched bool, res *Results) *Results {
+func CheckOrganization(release *music.Release, snatched bool, res *Propolis) *Propolis {
 	notTooLong := fs.GetMaxPathLength(release.Path) < 180
-	res.Add(log.Critical(notTooLong, "2.3.12", "Maximum character length is less than 180 characters.", "Maximum character length exceeds 180 characters."))
+	res.ConditionCheck(LevelCritical, "2.3.12", "Maximum character length is less than 180 characters.", "Maximum character length exceeds 180 characters.", notTooLong)
 	if !notTooLong {
 		for _, f := range fs.GetExceedinglyLongPaths(release.Path, 180) {
-			res.Add(log.Critical(notTooLong, "2.3.12", "", arrowHeader+"Too long: "+f))
+			res.ConditionCheck(LevelCritical, "2.3.12", "", arrowHeader+"Too long: "+f, false)
 		}
 	}
 
@@ -101,97 +83,78 @@ func CheckOrganization(release *music.Release, snatched bool, res *Results) *Res
 		allowedExtensions = append(allowedExtensions, ".json")
 	}
 	forbidden := fs.GetForbiddenFilesByExt(release.Path, allowedExtensions)
-	res.Add(log.Critical(len(forbidden) == 0, "wiki#371", "Release only contains allowed extensions. ", "Release contains forbidden extensions, which would be rejected by upload.php."))
+	res.ConditionCheck(LevelCritical, "wiki#371", "Release only contains allowed extensions. ", "Release contains forbidden extensions, which would be rejected by upload.php.", len(forbidden) == 0)
 	if len(forbidden) != 0 {
-		res.Add(log.Critical(len(forbidden) == 0, "wiki#371", "", arrowHeader+"Forbidden files: "+strings.Join(forbidden, ", ")))
+		res.ConditionCheck(LevelCritical, "wiki#371", "", arrowHeader+"Forbidden files: "+strings.Join(forbidden, ", "), false)
 	}
 
 	// checking for empty dirs or uselessly nested folders
-	res.Add(log.Critical(!fs.HasEmptyNestedFolders(release.Path), "2.3.3", "Release does not have empty folders or unnecessary nested folders.", "Release has empty folders or unnecessary nested folders."))
-
-	res.Add(log.Critical(len(fs.GetFilesAndFoldersByPrefix(release.Path, forbiddenLeadingCharacters)) == 0, "2.3.20", "No leading space/dot found in files and folders.", "Release has files or folders with a leading space or dot."))
-
+	res.ConditionCheck(LevelCritical, "2.3.3", "Release does not have empty folders or unnecessary nested folders.", "Release has empty folders or unnecessary nested folders.", !fs.HasEmptyNestedFolders(release.Path))
+	res.ConditionCheck(LevelCritical, "2.3.20", "No leading space/dot found in files and folders.", "Release has files or folders with a leading space or dot.", len(fs.GetFilesAndFoldersByPrefix(release.Path, forbiddenLeadingCharacters)) == 0)
 	err := release.CheckMultiDiscOrganization()
-	if err != nil {
-		res.Add(log.Critical(err == nil, "2.3.15", "", "Tracks from this multi-disc release are incorrectly organized: "+err.Error()))
-	} else {
-		res.Add(log.Critical(err == nil, "2.3.15", "Release is not multi-disc, or files from multiple discs are either in top folder with disc numbers in filenames, or in dedicated subfolders.", ""))
-	}
+	res.ErrorCheck(LevelCritical, "2.3.15", "Release is not multi-disc, or files from multiple discs are either in top folder with disc numbers in filenames, or in dedicated subfolders.", "Tracks from this multi-disc release are incorrectly organized", err, AppendError)
 
 	return res
 }
 
-func CheckTags(release *music.Release, res *Results) *Results {
-	res.Add(log.Critical(release.CheckTags() == nil, "2.3.16.1/4", "All tracks have at least the required tags.", "At least one tracks is missing required tags."))
-	res.Add(log.NonCritical(release.CheckMaxMetadataSize(1024*1024) == nil, internalRule, "All tracks have metadata blocks of a total size smaller then 1024 KiB.", "At least one track has metadata blocks of a total size bigger than 1024 KiB, probably due to excessive padding, embedded art, or more exotic things."))
-	res.Add(log.Critical(release.CheckMaxCoverAndPaddingSize() <= 1024*1024, "2.3.19", "All tracks either have no embedded art, or the embedded art size is less than 1024KiB (padding included).", "At least one track has embedded art and padding exceeding the maximum allowed size of 1024 KiB."))
-
-	err := release.CheckConsistentTags()
-	res.Add(log.Critical(err == nil, internalRule, "Release-level tags seem consistent among tracks.", "Tracks have inconsistent tags about the release."))
-	if err != nil {
-		res.Add(log.Critical(err == nil, internalRule, "", arrowHeader+"Found: "+err.Error()))
-		// TODO album title can be different in case of multidisc -- 2.3.18.3.3
-	}
-
-	err = release.CheckAlbumArtist()
-	res.Add(log.NonCritical(err == nil, internalRule, "Artist/Album artist tags seem consistent.", "Artist/Album artist tags could be improved."))
-	if err != nil {
-		res.Add(log.NonCritical(err == nil, internalRule, "", arrowHeader+"Found: "+err.Error()))
-	}
-
-	// check combined tags
-
+func CheckTags(release *music.Release, res *Propolis) *Propolis {
+	res.ErrorCheck(LevelCritical, "2.3.16.1/4", OKRequiredTags, KORequiredTags, release.CheckTags(), DoNotAppendError)
+	res.ErrorCheck(LevelCritical, internalRule, OKMetadataSize, KOMetadataSize, release.CheckMaxMetadataSize(Size1024KiB), DoNotAppendError)
+	res.ConditionCheck(LevelCritical, "2.3.19", OKCoverSize, KOCoverSize, release.CheckMaxCoverAndPaddingSize() <= Size1024KiB)
+	res.ErrorCheck(LevelCritical, internalRule, OKConsistentTags, KOConsistentTags, release.CheckConsistentTags(), AppendError)
+	// TODO album title can be different in case of multidisc -- 2.3.18.3.3
+	res.ErrorCheck(LevelWarning, internalRule, OKConsistentAlbumArtist, KOConsistentAlbumArtist, release.CheckAlbumArtist(), AppendError)
+	// TODO check combined tags
 	// TODO export tags to txt file
 	return res
 }
-
-func CheckFilenames(release *music.Release, res *Results) *Results {
+func CheckFilenames(release *music.Release, res *Propolis) *Propolis {
+	// checking for forbidden characters
 	withForbiddenChars := fs.GetFilesAndFoldersBySubstring(release.Path, forbiddenCharacters)
-	res.Add(log.Critical(len(withForbiddenChars) == 0, internalRule, "Tracks filenames do not appear to contain problematic characters.", "At least one track filename or folder contains problematic characters."))
+	res.ConditionCheck(LevelCritical, internalRule, OKValidCharacters, KOValidCharacters, len(withForbiddenChars) == 0)
 	if len(withForbiddenChars) != 0 {
-		res.Add(log.Critical(len(withForbiddenChars) == 0, internalRule, "", "⮕ In files and folders: "+strings.Join(withForbiddenChars, ", ")))
+		res.ConditionCheck(LevelCritical, internalRule, BlankBecauseImpossible, arrowHeader+fmt.Sprintf(InvalidCharacters, strings.Join(withForbiddenChars, ", ")), len(withForbiddenChars) == 0)
 	}
-
+	// detecting track.FLAC, track.Flac
 	var capitalizedExt bool
 	for _, f := range release.Flacs {
-		if filepath.Ext(f.Path) == ".FLAC" {
+		if strings.ToLower(filepath.Ext(f.Path)) == ".flac" && filepath.Ext(f.Path) != ".flac" {
 			capitalizedExt = true
 			break
 		}
 	}
-	res.Add(log.NonCritical(!capitalizedExt, internalRule, "Track filenames have lower case extensions.", "At least one filename has an uppercase .FLAC extension."))
-
+	res.ConditionCheck(LevelWarning, internalRule, OKLowerCaseExtensions, KOLowerCaseExtensions, !capitalizedExt)
+	// checking filenames contain track numbers and (at least part of) the title
 	if len(release.Flacs) != 1 {
-		res.Add(log.Critical(release.CheckTrackNumbersInFilenames(), "2.3.13", "All tracks filenames appear to contain their track number.", "At least one track filename does not contain its track number."))
+		res.ConditionCheck(LevelCritical, "2.3.13", OKTrackNumbersInFilenames, KOTrackNumbersInFilenames, release.CheckTrackNumbersInFilenames())
 	} else {
-		res.Add(log.NonCritical(release.CheckTrackNumbersInFilenames(), "2.3.13", "The track filename appears to contain the track number.", "The track filename does not contain the track number. It is not required for singles, but good practice nonetheless."))
+		res.ConditionCheck(LevelWarning, "2.3.13", OKTrackNumberInFilename, KOTrackNumberInFilename, release.CheckTrackNumbersInFilenames())
 	}
-
-	res.Add(log.Critical(release.CheckFilenameContainsStartOfTitle(minTitleSize), "2.3.11", "All tracks filenames appear to contain at least the beginning of song titles.", "At least one track filename does not seem to include the beginning of the song title."))
-
+	res.ConditionCheck(LevelCritical, "2.3.11", OKTitleInFilenames, KOTitleInFilenames, release.CheckFilenameContainsStartOfTitle(minTitleSize))
+	// checking filename order
 	ordered, err := release.CheckFilenameOrder()
 	if err != nil {
-		res.Add(log.Critical(err == nil, internalRule, "", "Could not check filename/subfolder order. Track/Disc numbers might not be numbers: "+err.Error()))
+		res.ErrorCheck(LevelCritical, internalRule, BlankBecauseImpossible, KOCheckingFilenameOrder, err, AppendError)
 	} else {
-		res.Add(log.Critical(ordered, "2.3.14./.2", "Files and subfolder names respect the playing order of the release.", "Files and/or subfolder names do not sort alphabetically into the playing order of the release."))
+		res.ConditionCheck(LevelCritical, "2.3.14./.2", OKFilenameOrder, KOFilenameOrder, ordered)
 	}
-
 	return res
 }
 
-func CheckFolderName(release *music.Release, res *Results) *Results {
+func CheckFolderName(release *music.Release, res *Propolis) *Propolis {
 	if len(release.Flacs) == 0 {
-		res.Add(log.Critical(len(release.Flacs) != 0, internalRule, "", "Release has no FLACs!"))
+		res.ConditionCheck(LevelCritical, internalRule, BlankBecauseImpossible, KOFlacPresent, len(release.Flacs) != 0)
 		return res
 	}
 	// comparisons are case insensitive
 	folderName := strings.ToLower(filepath.Base(release.Path))
-
 	// getting metadata
 	tags := release.Flacs[0].CommonTags()
 	title := tags.Album
-	res.Add(log.Critical(strings.Contains(folderName, strings.ToLower(title)), "2.3.2", "Title of album is in folder name.", "Title of album (as found in the tags of the first track) is not in the folder name."))
 
+	// checking title is in folder name
+	res.ConditionCheck(LevelCritical, "2.3.2", OKTitleInFoldername, KOTitleInFoldername, strings.Contains(folderName, strings.ToLower(title)))
+	// checking artists are in the folder name
 	artists := tags.AlbumArtist
 	if len(artists) == 0 {
 		// no album artist found, falling back to artists
@@ -204,15 +167,18 @@ func CheckFolderName(release *music.Release, res *Results) *Results {
 	if len(artists) >= 3 {
 		artists = []string{"Various Artists", "VA"}
 	}
-	var artistsFound int
+	var artistsNotFound []string
 	for _, a := range artists {
-		if strings.Contains(folderName, strings.ToLower(a)) {
-			artistsFound++
+		if !strings.Contains(folderName, strings.ToLower(a)) {
+			artistsNotFound = append(artistsNotFound, a)
 		}
 	}
-
-	res.Add(log.NonCritical(len(artists) == artistsFound, "2.3.2", "All album artists found in folder name.", "Not all (if any) album artists (as found in the tags of the first track) found in the folder name."))
-
+	if len(artists) >= 3 && len(artistsNotFound) == 1 {
+		// one of the "Various Artists" forms was found, considering everything was found
+		artistsNotFound = []string{}
+	}
+	res.ConditionCheck(LevelWarning, "2.3.2", OKArtistsInFoldername, fmt.Sprintf(KOArtistsInFoldername, strings.Join(artistsNotFound, ", ")), len(artistsNotFound) == 0)
+	// checking year is mentioned
 	year := tags.Year
 	date := tags.Date
 	if year != "" || date != "" {
@@ -223,36 +189,36 @@ func CheckFolderName(release *music.Release, res *Results) *Results {
 		if date != "" {
 			foundDate = strings.Contains(folderName, date)
 		}
-		res.Add(log.NonCritical(foundYear || foundDate, "2.3.2", "Year of album is in folder name.", "Year of album (as found in the tags of the first track) is not in the folder name."))
+		res.ConditionCheck(LevelWarning, "2.3.2", OKYearInFoldername, KOYearInFoldername, foundYear || foundDate)
 	}
-	res.Add(log.NonCritical(strings.Contains(folderName, "flac"), "2.3.2", "Format (FLAC) found in folder name.", "Format (FLAC) not found in folder name."))
-
+	// checking if formal is mentioned
+	res.ConditionCheck(LevelWarning, "2.3.2", OKFormatInFoldername, KOFormatInFoldername, strings.Contains(folderName, "flac"))
 	if release.Has24bitTracks() {
-		res.Add(log.NonCritical(strings.Contains(folderName, "24"), "2.3.2", "Folder name properly mentions the release has 24bit FLAC tracks.", "Since release seems to contain 24bit FLACs, the folder name could mention it. "))
+		res.ConditionCheck(LevelWarning, "2.3.2", OK24BitInFoldername, KO24BitInFoldername, strings.Contains(folderName, "24"))
 	}
-
+	// checking if source is mentioned
 	logsAndCues := fs.GetAllowedFilesByExt(release.Path, []string{".log", ".cue"})
 	if len(logsAndCues) != 0 {
-		res.Add(log.NonCritical(strings.Contains(folderName, "cd"), "2.3.2", "Release contains .log/.cue files and the folder name properly mentions a CD source.", "Since release contains .log/.cue, it seems to be sourced from CD. The folder name could mention it. "))
+		res.ConditionCheck(LevelWarning, "2.3.2", OKCDInFoldername, KOCDInFoldername, strings.Contains(folderName, "cd"))
 	} else {
-		res.Add(log.NonCritical(strings.Contains(folderName, "web"), "2.3.2", "Release does not contain .log/.cue files and the folder name properly mentions a WEB source.", "Since release does not .log/.cue, it is probably sources from WEB. The folder name could mention it. "))
+		res.ConditionCheck(LevelWarning, "2.3.2", OKWEBInFoldername, KOWEBInFoldername, strings.Contains(folderName, "web"))
 	}
 
 	return res
 }
 
-func CheckExtraFiles(release *music.Release, res *Results) *Results {
-	res.Add(log.NonCritical(release.HasCover(), internalRule, "Release has a conventional "+music.DefaultCover+" in the top folder or in all disc subfolders.", "Cannot find "+music.DefaultCover+" in top folder or in all disc subfolders, consider adding one or renaming the cover to that name."))
-
+func CheckExtraFiles(release *music.Release, res *Propolis) *Propolis {
+	// checking for cover
+	res.ConditionCheck(LevelWarning, internalRule, fmt.Sprintf(OKCoverFound, music.DefaultCover), fmt.Sprintf(KOCoverFound, music.DefaultCover), release.HasCover())
+	// checking for extra files
 	nonMusic := fs.GetAllowedFilesByExt(release.Path, nonMusicExtensions)
-	res.Add(log.NonCritical(len(nonMusic) != 0, internalRule, "Release has "+strconv.Itoa(len(nonMusic))+" accompanying files.", "Release does not have any kind of accompanying files. Suggestion: consider adding at least a cover."))
-
+	res.ConditionCheck(LevelWarning, internalRule, fmt.Sprintf(OKExtraFiles, len(nonMusic)), KOExtraFiles, len(nonMusic) != 0)
+	// displaying extra files size and checking ratio vs. music files
 	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
 	nonMusicSize := float64(fs.GetPartialSize(release.Path, nonMusic)) / (1024 * 1024)
-	res.Add(log.Info(true, internalRule, "Total size of accompanying files: "+strconv.FormatFloat(nonMusicSize, 'f', 2, 32)+"Mb.", ""))
 	ratio := 100 * nonMusicSize / totalSize
-	res.Add(log.NonCritical(ratio < 10, internalRule, "Accompanying files represent "+strconv.FormatFloat(ratio, 'f', 2, 32)+"% of the total size.", "Accompanying files represent "+strconv.FormatFloat(ratio, 'f', 2, 32)+"% of the total size. Suggestion: if this is because of high resolution artwork or notes, consider uploading separately and linking the files in the description."))
-
+	res.ConditionCheck(LevelInfo, internalRule, fmt.Sprintf(OKExtraFilesSize, strconv.FormatFloat(nonMusicSize, 'f', 2, 32)), BlankBecauseImpossible, true)
+	res.ConditionCheck(LevelWarning, internalRule, fmt.Sprintf(OKExtraFilesRatio, strconv.FormatFloat(ratio, 'f', 2, 32)), fmt.Sprintf(KOExtraFilesRatio, strconv.FormatFloat(ratio, 'f', 2, 32)), ratio < 10)
 	return res
 }
 
