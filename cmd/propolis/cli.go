@@ -25,6 +25,7 @@ Options:
     --snatched       Snatched mode: allow varroa metadata files, spec generated in <PATH>
     --no-specs       Disable spectrograms generation.
     --only-problems  Only show problems (warnings & errors).
+    --json           Toggles JSON output. Sets --only-problems to false.
     -h, --help       Show this screen.
     --version        Show version.
 `
@@ -58,6 +59,9 @@ func (m *propolisArgs) parseCLI(osArgs []string) error {
 	m.disableSpecs = args["--no-specs"].(bool)
 	m.problemsOnly = args["--only-problems"].(bool)
 	m.jsonOutput = args["--json"].(bool)
+	if m.jsonOutput {
+		m.problemsOnly = false
+	}
 	m.path = args["<PATH>"].(string)
 	if !fs.DirExists(m.path) {
 		return errors.New("target path " + m.path + " not found")
