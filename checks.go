@@ -79,10 +79,10 @@ func CheckOrganization(release *music.Release, snatched bool, res *Propolis) *Pr
 	}
 
 	// checking for only allowed extensions are used
-	if snatched {
-		allowedExtensions = append(allowedExtensions, ".json")
-	}
 	forbidden := fs.GetForbiddenFilesByExt(release.Path, allowedExtensions)
+	if snatched {
+		forbidden = IgnoreVarroaFiles(forbidden)
+	}
 	res.ConditionCheck(LevelCritical, "wiki#371", "Release only contains allowed extensions. ", "Release contains forbidden extensions, which would be rejected by upload.php.", len(forbidden) == 0)
 	if len(forbidden) != 0 {
 		res.ConditionCheck(LevelCritical, "wiki#371", "", ArrowHeader+"Forbidden files: "+strings.Join(forbidden, ", "), false)
@@ -108,9 +108,12 @@ func CheckTags(release *music.Release, res *Propolis) *Propolis {
 	// TODO export tags to txt file
 	return res
 }
-func CheckFilenames(release *music.Release, res *Propolis) *Propolis {
+func CheckFilenames(release *music.Release, snatched bool, res *Propolis) *Propolis {
 	// checking for forbidden characters
 	withForbiddenChars := fs.GetFilesAndFoldersBySubstring(release.Path, forbiddenCharacters)
+	if snatched {
+		withForbiddenChars = IgnoreVarroaFiles(withForbiddenChars)
+	}
 	res.ConditionCheck(LevelCritical, internalRule, OKValidCharacters, KOValidCharacters, len(withForbiddenChars) == 0)
 	if len(withForbiddenChars) != 0 {
 		res.ConditionCheck(LevelCritical, internalRule, BlankBecauseImpossible, ArrowHeader+fmt.Sprintf(InvalidCharacters, strings.Join(withForbiddenChars, ", ")), len(withForbiddenChars) == 0)

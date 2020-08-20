@@ -55,7 +55,7 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput, stdOutpu
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleTags), logthis.NORMAL)
 	analysis = CheckTags(release, analysis)
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleFilenames), logthis.NORMAL)
-	analysis = CheckFilenames(release, analysis)
+	analysis = CheckFilenames(release, snatched, analysis)
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleExtraFiles), logthis.NORMAL)
 	analysis = CheckExtraFiles(release, analysis)
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleFoldername), logthis.NORMAL)
