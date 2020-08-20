@@ -25,13 +25,13 @@ func main() {
 		return
 	}
 
-	res, _, err := propolis.Run(cli.path, cli.disableSpecs, cli.problemsOnly, cli.snatched, cli.jsonOutput, Version)
+	results, _, err := propolis.Run(cli.path, cli.disableSpecs, cli.problemsOnly, cli.snatched, cli.jsonOutput, Version)
 	if err != nil {
 		logthis.Error(err, logthis.NORMAL)
 	}
 
 	// returning nonzero exit status if something serious was found
-	if res.Errors != 0 {
+	if results.Errors != 0 {
 		syscall.Exit(1)
 	}
 }

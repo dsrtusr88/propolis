@@ -17,6 +17,7 @@ type Propolis struct {
 	Checks    []*Check `json:"checks"`
 	stdOutput bool
 	buffer    bytes.Buffer
+	Passed    int
 	Errors    int
 	Warnings  int
 }
@@ -36,24 +37,23 @@ func (p *Propolis) ToggleStdOutput(enabled bool) {
 	}
 }
 
-func (p *Propolis) ParseResults() (int, int, int) {
-	var numOK int
+func (p *Propolis) ParseResults() {
+	p.Passed, p.Warnings, p.Errors = 0, 0, 0
 	for _, c := range p.Checks {
 		switch c.Result {
 		case OK:
-			numOK++
+			p.Passed++
 		case Warning:
 			p.Warnings++
 		case KO:
 			p.Errors++
 		}
 	}
-	return numOK, p.Warnings, p.Errors
 }
 
 func (p *Propolis) Summary() string {
-	ok, warn, ko := p.ParseResults()
-	return fmt.Sprintf("%d checks OK, %d checks KO, and %d warnings.", ok, ko, warn)
+	p.ParseResults()
+	return fmt.Sprintf("%d checks OK, %d checks KO, and %d warnings.", p.Passed, p.Errors, p.Warnings)
 }
 
 func (p *Propolis) ConditionCheck(level Level, rule, OKString, KOString string, condition bool) {

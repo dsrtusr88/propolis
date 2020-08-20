@@ -8,6 +8,8 @@ const (
 	errorMsg = "error"
 )
 
+var Version = "dev"
+
 func main() {
 	var err error
 	config, err = NewConfig(DefaultConfigurationFile)

@@ -29,35 +29,35 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput bool, ver
 	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
 
 	// creating overall check struct and adding the first checks
-	res := NewPropolis(path)
+	analysis := NewPropolis(path)
 	if jsonOutput {
-		res.ToggleStdOutput(false)
+		analysis.ToggleStdOutput(false)
 	}
 
 	// general checks
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined("Checking Path is a music release"), logthis.NORMAL)
 	err := release.ParseFiles()
 
-	res.ErrorCheck(LevelCritical, "2.3.1", "Release contains FLAC files", "Error parsing files", err, DoNotAppendError)
+	analysis.ErrorCheck(LevelCritical, "2.3.1", "Release contains FLAC files", "Error parsing files", err, DoNotAppendError)
 	if err != nil {
-		res.ConditionCheck(LevelCritical, "2.2.10.8", arrowHeader+"At least one FLAC has illegal ID3v2 tags.", arrowHeader+err.Error(), errors.Is(err, flac.ErrNoFlacHeader))
+		analysis.ConditionCheck(LevelCritical, "2.2.10.8", arrowHeader+"At least one FLAC has illegal ID3v2 tags.", arrowHeader+err.Error(), errors.Is(err, flac.ErrNoFlacHeader))
 	}
-	res.ConditionCheck(LevelInfo, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", "", true)
+	analysis.ConditionCheck(LevelInfo, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", "", true)
 
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleMusic), logthis.NORMAL)
-	res = CheckMusicFiles(release, res)
+	analysis = CheckMusicFiles(release, analysis)
 
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleOrganization), logthis.NORMAL)
-	res = CheckOrganization(release, snatched, res)
+	analysis = CheckOrganization(release, snatched, analysis)
 
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleTags), logthis.NORMAL)
-	res = CheckTags(release, res)
+	analysis = CheckTags(release, analysis)
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleFilenames), logthis.NORMAL)
-	res = CheckFilenames(release, res)
+	analysis = CheckFilenames(release, analysis)
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleExtraFiles), logthis.NORMAL)
-	res = CheckExtraFiles(release, res)
+	analysis = CheckExtraFiles(release, analysis)
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleFoldername), logthis.NORMAL)
-	res = CheckFolderName(release, res)
+	analysis = CheckFolderName(release, analysis)
 
 	var overviewFile string
 	if !disableSpecs {
@@ -70,15 +70,15 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput bool, ver
 		}
 	}
 	if jsonOutput {
-		res.ToggleStdOutput(true)
+		analysis.ToggleStdOutput(true)
 		// TODO take --only-problems into account!
-		logthis.Info(res.JSONOutput(), logthis.NORMAL)
+		logthis.Info(analysis.JSONOutput(), logthis.NORMAL)
 	} else {
-		logthis.Info("\n"+titleHeader+ui.BlueBoldUnderlined("Results\n")+ui.Blue(res.Summary()), logthis.NORMAL)
+		logthis.Info("\n"+titleHeader+ui.BlueBoldUnderlined("Results\n")+ui.Blue(analysis.Summary()), logthis.NORMAL)
 	}
 	// saving log to file
-	if err != res.SaveOuput(metadataDir, version) {
-		return res, overviewFile, err
+	if err != analysis.SaveOuput(metadataDir, version) {
+		return analysis, overviewFile, err
 	}
-	return res, overviewFile, nil
+	return analysis, overviewFile, nil
 }
