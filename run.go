@@ -29,7 +29,7 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput bool, ver
 	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
 
 	// creating overall check struct and adding the first checks
-	analysis := NewPropolis(path)
+	analysis := NewPropolis(path, problemsOnly)
 	if jsonOutput {
 		analysis.ToggleStdOutput(false)
 	}

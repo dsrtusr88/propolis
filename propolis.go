@@ -13,17 +13,18 @@ import (
 )
 
 type Propolis struct {
-	Path      string   `json:"path"`
-	Checks    []*Check `json:"checks"`
-	stdOutput bool
-	buffer    bytes.Buffer
-	Passed    int
-	Errors    int
-	Warnings  int
+	Path         string   `json:"path"`
+	Checks       []*Check `json:"checks"`
+	stdOutput    bool
+	problemsOnly bool
+	buffer       bytes.Buffer
+	Passed       int
+	Errors       int
+	Warnings     int
 }
 
-func NewPropolis(path string) *Propolis {
-	return &Propolis{Path: path, stdOutput: true}
+func NewPropolis(path string, problemsOnly bool) *Propolis {
+	return &Propolis{Path: path, stdOutput: true, problemsOnly: problemsOnly}
 }
 
 func (p *Propolis) ToggleStdOutput(enabled bool) {
@@ -92,6 +93,9 @@ func (p *Propolis) ListWarnings() string {
 func (p *Propolis) Output() string {
 	var output string
 	for _, c := range p.Checks {
+		if p.problemsOnly && (c.Result == OK || c.Result == Info || c.Result == NeutralInfo) {
+			continue
+		}
 		// no color support, use case is writing log files
 		output += c.RawString() + "\n"
 	}
