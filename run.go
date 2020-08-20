@@ -16,7 +16,7 @@ var (
 	log = &Log{}
 )
 
-func Run(path string, disableSpecs, problemsOnly, snatched bool, version string) (*Propolis, string, error) {
+func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput bool, version string) (*Propolis, string, error) {
 	// setting output config
 	log.problemsOnly = problemsOnly
 
@@ -29,7 +29,10 @@ func Run(path string, disableSpecs, problemsOnly, snatched bool, version string)
 	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
 
 	// creating overall check struct and adding the first checks
-	res := NewPropolis(path, StdOutput)
+	res := NewPropolis(path)
+	if jsonOutput {
+		res.ToggleStdOutput(false)
+	}
 
 	// general checks
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined("Checking Path is a music release"), logthis.NORMAL)
@@ -59,14 +62,20 @@ func Run(path string, disableSpecs, problemsOnly, snatched bool, version string)
 	var overviewFile string
 	if !disableSpecs {
 		logthis.Info(titleHeader+ui.BlueBoldUnderlined("Generating spectrograms"), logthis.NORMAL)
-		overviewFile, err = GenerateSpectrograms(release)
+		overviewFile, err = GenerateSpectrograms(release, !jsonOutput)
 		if err != nil {
 			logthis.Error(err, logthis.NORMAL)
 		} else {
 			logthis.Info(ui.BlueBold("Spectrograms generated in "+metadataDir+". Check for transcodes (see wiki#408)."), logthis.NORMAL)
 		}
 	}
-	logthis.Info("\n"+titleHeader+ui.BlueBoldUnderlined("Results\n")+ui.Blue(res.Summary()), logthis.NORMAL)
+	if jsonOutput {
+		res.ToggleStdOutput(true)
+		// TODO take --only-problems into account!
+		logthis.Info(res.JSONOutput(), logthis.NORMAL)
+	} else {
+		logthis.Info("\n"+titleHeader+ui.BlueBoldUnderlined("Results\n")+ui.Blue(res.Summary()), logthis.NORMAL)
+	}
 	// saving log to file
 	if err != res.SaveOuput(metadataDir, version) {
 		return res, overviewFile, err

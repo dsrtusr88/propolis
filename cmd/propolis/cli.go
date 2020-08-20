@@ -19,7 +19,7 @@ Description:
     Detect trumpable releases.
 	
 Usage:
-    propolis [--no-specs] [--only-problems] [--snatched] <PATH>
+    propolis [--no-specs] [--only-problems] [--snatched] [--json] <PATH>
 
 Options:
     --snatched       Snatched mode: allow varroa metadata files, spec generated in <PATH>
@@ -39,6 +39,7 @@ type propolisArgs struct {
 	disableSpecs bool
 	problemsOnly bool
 	snatched     bool
+	jsonOutput   bool
 	path         string
 }
 
@@ -56,6 +57,7 @@ func (m *propolisArgs) parseCLI(osArgs []string) error {
 	m.snatched = args["--snatched"].(bool)
 	m.disableSpecs = args["--no-specs"].(bool)
 	m.problemsOnly = args["--only-problems"].(bool)
+	m.jsonOutput = args["--json"].(bool)
 	m.path = args["<PATH>"].(string)
 	if !fs.DirExists(m.path) {
 		return errors.New("target path " + m.path + " not found")

@@ -1,40 +1,59 @@
 package propolis
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
+
+	"gitlab.com/catastrophic/assistance/logthis"
 )
 
 type Propolis struct {
-	Path           string   `json:"path"`
-	Checks         []*Check `json:"checks"`
-	output         OutputType
-	CriticalErrors int
+	Path      string   `json:"path"`
+	Checks    []*Check `json:"checks"`
+	stdOutput bool
+	buffer    bytes.Buffer
+	Errors    int
+	Warnings  int
 }
 
-func NewPropolis(path string, out OutputType) *Propolis {
-	return &Propolis{Path: path, output: out}
+func NewPropolis(path string) *Propolis {
+	return &Propolis{Path: path, stdOutput: true}
 }
 
-func (p *Propolis) AddChecks(c ...*Check) {
-	p.Checks = append(p.Checks, c...)
+func (p *Propolis) ToggleStdOutput(enabled bool) {
+	p.stdOutput = enabled
+	if !enabled {
+		logthis.SetLevel(logthis.VERBOSESTEST)
+		logthis.SetStdOutput(true)
+		logthis.SetOutputWriter(&p.buffer)
+	} else {
+		logthis.SetOutputWriter(os.Stdout)
+	}
 }
 
-func (p *Propolis) Summary() string {
-	var numOK, numWarning int
+func (p *Propolis) ParseResults() (int, int, int) {
+	var numOK int
 	for _, c := range p.Checks {
 		switch c.Result {
 		case OK:
 			numOK++
 		case Warning:
-			numWarning++
+			p.Warnings++
 		case KO:
-			p.CriticalErrors++
+			p.Errors++
 		}
 	}
-	return fmt.Sprintf("%d checks OK, %d checks KO, and %d warnings.", numOK, p.CriticalErrors, numWarning)
+	return numOK, p.Warnings, p.Errors
+}
+
+func (p *Propolis) Summary() string {
+	ok, warn, ko := p.ParseResults()
+	return fmt.Sprintf("%d checks OK, %d checks KO, and %d warnings.", ok, ko, warn)
 }
 
 func (p *Propolis) ConditionCheck(level Level, rule, OKString, KOString string, condition bool) {
@@ -83,4 +102,15 @@ func (p *Propolis) SaveOuput(dir, version string) error {
 	// TODO check dir
 	outputFile := filepath.Join(dir, fmt.Sprintf("propolis_%s.log", version))
 	return ioutil.WriteFile(outputFile, []byte(p.Output()), 0600)
+}
+
+// JSONOutput the complete log in JSON
+func (p Propolis) JSONOutput() string {
+	p.ParseResults()
+	// marshallIndentint *p itself
+	data, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		return "could not generate JSON"
+	}
+	return string(data)
 }

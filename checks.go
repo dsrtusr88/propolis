@@ -222,12 +222,12 @@ func CheckExtraFiles(release *music.Release, res *Propolis) *Propolis {
 	return res
 }
 
-func GenerateSpectrograms(release *music.Release) (string, error) {
+func GenerateSpectrograms(release *music.Release, verbose bool) (string, error) {
 	// generating full spectrograms
-	_, err := release.GenerateSpectrograms("propolis", true)
+	_, err := release.GenerateSpectrograms("propolis", verbose)
 	if err != nil {
 		return "", err
 	}
 	// combination of 10s slices from each song
-	return release.GenerateCombinedSpectrogram(true)
+	return release.GenerateCombinedSpectrogram(verbose)
 }

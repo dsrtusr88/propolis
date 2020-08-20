@@ -16,27 +16,18 @@ const (
 type Level int
 
 const (
-	StdOutput = iota
-	FileOutput
-	StdAndFileOutput
-	JsonOutput
-)
-
-const (
 	AppendError      = true
 	DoNotAppendError = false
 )
 
-type OutputType int
-
 type Check struct {
 	Rule          string `json:"rule"`
-	ConditionOK   string
-	ConditionKO   string
+	ConditionOK   string `json:"-"`
+	ConditionKO   string `json:"-"`
 	Result        Result `json:"result"`
 	Level         Level  `json:"level"`
 	ResultComment string `json:"result_comment"`
-	Bullet        string
+	Bullet        string `json:"-"`
 }
 
 func NewCheck(rule string, level Level, ok, ko string) *Check {
