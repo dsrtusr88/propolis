@@ -2,6 +2,7 @@ package propolis
 
 import (
 	"os/exec"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -15,4 +16,14 @@ func CheckExternalBinaries(externalBinaries ...string) error {
 		}
 	}
 	return nil
+}
+
+func IgnoreVarroaFiles(files []string) []string {
+	var clean []string
+	for _, e := range files {
+		if !strings.Contains(e, "TrackerMetadata") {
+			clean = append(clean, e)
+		}
+	}
+	return clean
 }
