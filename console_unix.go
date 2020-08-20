@@ -9,7 +9,7 @@ var (
 )
 
 const (
-	arrowHeader   = "⮕ "
+	ArrowHeader   = "⮕ "
 	internalRule  = ` -- `
 	OKString      = " 🗹 "
 	KOString      = " 🗷 "

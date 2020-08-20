@@ -21,17 +21,17 @@ func CheckMusicFiles(release *music.Release, res *Propolis) *Propolis {
 	isConsistent, bitDepth := release.CheckConsistentBitDepth()
 	res.ConditionCheck(LevelWarning, "2.1.6", fmt.Sprintf(OKSameBitDepth, bitDepth), KOSameBitDepth, isConsistent)
 	if !isConsistent {
-		res.ConditionCheck(LevelAwful, "2.1.6.2", arrowHeader+OKOne24bitTrack, arrowHeader+KOOne24bitTrack, release.Has24bitTracks())
+		res.ConditionCheck(LevelAwful, "2.1.6.2", ArrowHeader+OKOne24bitTrack, ArrowHeader+KOOne24bitTrack, release.Has24bitTracks())
 		// TODO check inconsistent but > 24bit
 	} else {
 		bitD, _ := strconv.Atoi(bitDepth)
-		res.ConditionCheck(LevelCritical, "2.1.1", arrowHeader+OKValidBitDepth, arrowHeader+KOValidBitDepth, bitD <= 24)
+		res.ConditionCheck(LevelCritical, "2.1.1", ArrowHeader+OKValidBitDepth, ArrowHeader+KOValidBitDepth, bitD <= 24)
 	}
 
 	isConsistent, sampleRate := release.CheckConsistentSampleRate()
 	res.ConditionCheck(LevelWarning, "2.1.6", fmt.Sprintf(OKSameSampleRate, sampleRate), KOSameSampleRate, isConsistent)
 	sr, _ := strconv.Atoi(sampleRate)
-	res.ConditionCheck(LevelCritical, "2.1.1", arrowHeader+OKValidSampleRate, arrowHeader+KOValidSampleRate, sr <= 192000)
+	res.ConditionCheck(LevelCritical, "2.1.1", ArrowHeader+OKValidSampleRate, ArrowHeader+KOValidSampleRate, sr <= 192000)
 
 	// NOTE: is the rule track-by-track or on average in the release? what about the stupid "silent" tracks in some releases before a hidden song?
 	minAvgBitRate, maxAvgBitRate := release.CheckMinMaxBitrates()
@@ -46,9 +46,9 @@ func CheckMusicFiles(release *music.Release, res *Propolis) *Propolis {
 	res.ErrorCheck(LevelCritical, "2.2.10.8", integrityCheckOK, KOIntegrityCheck, err, DoNotAppendError)
 	if err != nil {
 		if errors.Is(err, flac.ErrNoFlacHeader) {
-			res.ErrorCheck(LevelCritical, "2.2.10.8", "", arrowHeader+KOID3Tags, err, AppendError)
+			res.ErrorCheck(LevelCritical, "2.2.10.8", "", ArrowHeader+KOID3Tags, err, AppendError)
 		} else {
-			res.ErrorCheck(LevelCritical, internalRule, "", arrowHeader+KOIntegrity, err, AppendError)
+			res.ErrorCheck(LevelCritical, internalRule, "", ArrowHeader+KOIntegrity, err, AppendError)
 		}
 	}
 
@@ -61,9 +61,9 @@ func CheckMusicFiles(release *music.Release, res *Propolis) *Propolis {
 	res.ErrorCheck(LevelCritical, "2.2.10.10", "First track does not seem to be uncompressed FLAC.", "Error checking for uncompressed FLAC.", err, DoNotAppendError)
 	if err != nil {
 		if errors.Is(err, flac.ErrorUncompressed) {
-			res.ErrorCheck(LevelCritical, "2.2.10.10", "", arrowHeader+"The first track is uncompressed FLAC", err, AppendError)
+			res.ErrorCheck(LevelCritical, "2.2.10.10", "", ArrowHeader+"The first track is uncompressed FLAC", err, AppendError)
 		} else {
-			res.ErrorCheck(LevelCritical, "2.2.10.10", "", arrowHeader+"Other error", err, AppendError)
+			res.ErrorCheck(LevelCritical, "2.2.10.10", "", ArrowHeader+"Other error", err, AppendError)
 		}
 	}
 	return res
@@ -74,7 +74,7 @@ func CheckOrganization(release *music.Release, snatched bool, res *Propolis) *Pr
 	res.ConditionCheck(LevelCritical, "2.3.12", "Maximum character length is less than 180 characters.", "Maximum character length exceeds 180 characters.", notTooLong)
 	if !notTooLong {
 		for _, f := range fs.GetExceedinglyLongPaths(release.Path, 180) {
-			res.ConditionCheck(LevelCritical, "2.3.12", "", arrowHeader+"Too long: "+f, false)
+			res.ConditionCheck(LevelCritical, "2.3.12", "", ArrowHeader+"Too long: "+f, false)
 		}
 	}
 
@@ -85,7 +85,7 @@ func CheckOrganization(release *music.Release, snatched bool, res *Propolis) *Pr
 	forbidden := fs.GetForbiddenFilesByExt(release.Path, allowedExtensions)
 	res.ConditionCheck(LevelCritical, "wiki#371", "Release only contains allowed extensions. ", "Release contains forbidden extensions, which would be rejected by upload.php.", len(forbidden) == 0)
 	if len(forbidden) != 0 {
-		res.ConditionCheck(LevelCritical, "wiki#371", "", arrowHeader+"Forbidden files: "+strings.Join(forbidden, ", "), false)
+		res.ConditionCheck(LevelCritical, "wiki#371", "", ArrowHeader+"Forbidden files: "+strings.Join(forbidden, ", "), false)
 	}
 
 	// checking for empty dirs or uselessly nested folders
@@ -113,7 +113,7 @@ func CheckFilenames(release *music.Release, res *Propolis) *Propolis {
 	withForbiddenChars := fs.GetFilesAndFoldersBySubstring(release.Path, forbiddenCharacters)
 	res.ConditionCheck(LevelCritical, internalRule, OKValidCharacters, KOValidCharacters, len(withForbiddenChars) == 0)
 	if len(withForbiddenChars) != 0 {
-		res.ConditionCheck(LevelCritical, internalRule, BlankBecauseImpossible, arrowHeader+fmt.Sprintf(InvalidCharacters, strings.Join(withForbiddenChars, ", ")), len(withForbiddenChars) == 0)
+		res.ConditionCheck(LevelCritical, internalRule, BlankBecauseImpossible, ArrowHeader+fmt.Sprintf(InvalidCharacters, strings.Join(withForbiddenChars, ", ")), len(withForbiddenChars) == 0)
 	}
 	// detecting track.FLAC, track.Flac
 	var capitalizedExt bool

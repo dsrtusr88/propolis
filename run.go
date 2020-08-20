@@ -16,7 +16,9 @@ var (
 	log = &Log{}
 )
 
-func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput bool, version string) (*Propolis, string, error) {
+func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput, stdOutput bool, version string) (*Propolis, string, error) {
+	logthis.Info(ui.YellowBold(ArrowHeader+"Analysing "+path), logthis.NORMAL)
+
 	// setting output config
 	log.problemsOnly = problemsOnly
 
@@ -30,7 +32,7 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput bool, ver
 
 	// creating overall check struct and adding the first checks
 	analysis := NewPropolis(path, problemsOnly)
-	if jsonOutput {
+	if jsonOutput || !stdOutput {
 		analysis.ToggleStdOutput(false)
 	}
 
@@ -40,7 +42,7 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput bool, ver
 
 	analysis.ErrorCheck(LevelCritical, "2.3.1", "Release contains FLAC files", "Error parsing files", err, DoNotAppendError)
 	if err != nil {
-		analysis.ConditionCheck(LevelCritical, "2.2.10.8", arrowHeader+"At least one FLAC has illegal ID3v2 tags.", arrowHeader+err.Error(), errors.Is(err, flac.ErrNoFlacHeader))
+		analysis.ConditionCheck(LevelCritical, "2.2.10.8", ArrowHeader+"At least one FLAC has illegal ID3v2 tags.", ArrowHeader+err.Error(), errors.Is(err, flac.ErrNoFlacHeader))
 	}
 	analysis.ConditionCheck(LevelInfo, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", "", true)
 
