@@ -19,9 +19,12 @@ func (p *Propolis) CheckRelease() {
 	err := p.release.ParseFiles()
 	p.ErrorCheck(LevelCritical, "2.3.1", OKReleaseHasFlacs, KOReleaseHasFlacs, err, DoNotAppendError)
 	if err != nil {
-		p.ConditionCheck(LevelCritical, "2.2.10.8", ArrowHeader+KOID3v2Tags, ArrowHeader+err.Error(), errors.Is(err, flac.ErrNoFlacHeader))
+		p.ConditionCheck(LevelTrulyAwful, "2.2.10.8", ArrowHeader+KOID3v2Tags, ArrowHeader+err.Error(), errors.Is(err, flac.ErrorID3v2Header))
 	}
 	p.ConditionCheck(LevelInfo, internalRule, fmt.Sprintf(OKTotalSize, strconv.FormatFloat(totalSize, 'f', 2, 32)), BlankBecauseImpossible, true)
+	if len(p.release.Flacs) == 0 {
+		p.ConditionCheck(LevelCritical, internalRule, BlankBecauseImpossible, KONoTracks, len(p.release.Flacs) != 0)
+	}
 }
 
 func (p *Propolis) CheckMusicFiles() {
@@ -64,7 +67,7 @@ func (p *Propolis) CheckMusicFiles() {
 
 	// checking for id3v1 tags
 	err = p.release.CheckForID3v1Tags()
-	p.ErrorCheck(LevelWarning, internalRule, OKID3v1Tags, KOID3v1Tags, err, AppendError)
+	p.ErrorCheck(LevelWarning, internalRule, OKID3v1Tags, KOID3v1Tags, err, DoNotAppendError)
 
 	// checking for uncompressed flacs
 	err = p.release.CheckCompression()

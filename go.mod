@@ -9,9 +9,9 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.6.1
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
-	gitlab.com/catastrophic/assistance v0.36.2
+	gitlab.com/catastrophic/assistance v0.37.3
 	gitlab.com/passelecasque/obstruction v0.12.2
 	gopkg.in/yaml.v2 v2.2.8
 )
 
-//replace gitlab.com/catastrophic/assistance => ../../catastrophic/assistance
+// replace gitlab.com/catastrophic/assistance => ../../catastrophic/assistance

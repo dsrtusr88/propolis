@@ -31,31 +31,34 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput, stdOutpu
 		analysis.ToggleStdOutput(false)
 	}
 
+	var overviewFile string
+	var err error
+
 	// general checks
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleRelease), logthis.NORMAL)
 	analysis.CheckRelease()
-	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleMusic), logthis.NORMAL)
-	analysis.CheckMusicFiles()
-	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleOrganization), logthis.NORMAL)
-	analysis.CheckOrganization(snatched)
-	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleTags), logthis.NORMAL)
-	analysis.CheckTags()
-	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleFilenames), logthis.NORMAL)
-	analysis.CheckFilenames(snatched)
-	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleExtraFiles), logthis.NORMAL)
-	analysis.CheckExtraFiles()
-	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleFoldername), logthis.NORMAL)
-	analysis.CheckFolderName()
+	if len(analysis.release.Flacs) != 0 {
+		logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleMusic), logthis.NORMAL)
+		analysis.CheckMusicFiles()
+		logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleOrganization), logthis.NORMAL)
+		analysis.CheckOrganization(snatched)
+		logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleTags), logthis.NORMAL)
+		analysis.CheckTags()
+		logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleFilenames), logthis.NORMAL)
+		analysis.CheckFilenames(snatched)
+		logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleExtraFiles), logthis.NORMAL)
+		analysis.CheckExtraFiles()
+		logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleFoldername), logthis.NORMAL)
+		analysis.CheckFolderName()
 
-	var overviewFile string
-	var err error
-	if !disableSpecs {
-		logthis.Info(titleHeader+ui.BlueBoldUnderlined("Generating spectrograms"), logthis.NORMAL)
-		overviewFile, err = GenerateSpectrograms(release, !jsonOutput)
-		if err != nil {
-			logthis.Error(err, logthis.NORMAL)
-		} else {
-			logthis.Info(ui.BlueBold("Spectrograms generated in "+metadataDir+". Check for transcodes (see wiki#408)."), logthis.NORMAL)
+		if !disableSpecs {
+			logthis.Info(titleHeader+ui.BlueBoldUnderlined("Generating spectrograms"), logthis.NORMAL)
+			overviewFile, err = GenerateSpectrograms(release, !jsonOutput)
+			if err != nil {
+				logthis.Error(err, logthis.NORMAL)
+			} else {
+				logthis.Info(ui.BlueBold("Spectrograms generated in "+metadataDir+". Check for transcodes (see wiki#408)."), logthis.NORMAL)
+			}
 		}
 	}
 	if jsonOutput {

@@ -107,7 +107,11 @@ func (p *Propolis) Output() string {
 func (p *Propolis) SaveOuput(dir, version string) error {
 	// TODO check dir
 	outputFile := filepath.Join(dir, fmt.Sprintf("propolis_%s.log", version))
-	return ioutil.WriteFile(outputFile, []byte(p.Output()), 0600)
+	if err := ioutil.WriteFile(outputFile, []byte(p.Output()), 0600); err != nil {
+		return err
+	}
+	tagsOutputFile := filepath.Join(dir, "tags.txt")
+	return ioutil.WriteFile(tagsOutputFile, []byte(p.release.GetRawTags()), 0600)
 }
 
 // JSONOutput the complete log in JSON.

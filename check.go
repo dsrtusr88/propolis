@@ -11,6 +11,7 @@ const (
 	LevelWarning
 	LevelCritical
 	LevelAwful
+	LevelTrulyAwful
 )
 
 type Level int
@@ -84,6 +85,16 @@ func (c *Check) evaluate(condition bool) {
 			c.Result = Warning
 			c.ResultComment = c.ConditionOK
 			c.Bullet = WarningString
+		} else {
+			c.Result = KO
+			c.ResultComment = c.ConditionKO
+			c.Bullet = KOString
+		}
+	case LevelTrulyAwful:
+		if condition {
+			c.Result = KO
+			c.ResultComment = c.ConditionOK
+			c.Bullet = KOString
 		} else {
 			c.Result = KO
 			c.ResultComment = c.ConditionKO
