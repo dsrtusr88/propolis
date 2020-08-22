@@ -104,6 +104,11 @@ func (p *Propolis) Output() string {
 	return output
 }
 
+// Tags of the flacs.
+func (p *Propolis) Tags() string {
+	return p.release.GetRawTags()
+}
+
 func (p *Propolis) SaveOuput(dir, version string) error {
 	// TODO check dir
 	outputFile := filepath.Join(dir, fmt.Sprintf("propolis_%s.log", version))
