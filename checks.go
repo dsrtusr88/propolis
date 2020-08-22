@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"gitlab.com/catastrophic/assistance/flac"
 	"gitlab.com/catastrophic/assistance/fs"
@@ -16,11 +17,11 @@ import (
 func (p *Propolis) CheckRelease() {
 	totalSize := float64(fs.GetTotalSize(p.release.Path)) / (1024 * 1024)
 	err := p.release.ParseFiles()
-	p.ErrorCheck(LevelCritical, "2.3.1", "Release contains FLAC files", "Error parsing files", err, DoNotAppendError)
+	p.ErrorCheck(LevelCritical, "2.3.1", OKReleaseHasFlacs, KOReleaseHasFlacs, err, DoNotAppendError)
 	if err != nil {
-		p.ConditionCheck(LevelCritical, "2.2.10.8", ArrowHeader+"At least one FLAC has illegal ID3v2 tags.", ArrowHeader+err.Error(), errors.Is(err, flac.ErrNoFlacHeader))
+		p.ConditionCheck(LevelCritical, "2.2.10.8", ArrowHeader+KOID3v2Tags, ArrowHeader+err.Error(), errors.Is(err, flac.ErrNoFlacHeader))
 	}
-	p.ConditionCheck(LevelInfo, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", "", true)
+	p.ConditionCheck(LevelInfo, internalRule, fmt.Sprintf(OKTotalSize, strconv.FormatFloat(totalSize, 'f', 2, 32)), BlankBecauseImpossible, true)
 }
 
 func (p *Propolis) CheckMusicFiles() {
@@ -44,7 +45,7 @@ func (p *Propolis) CheckMusicFiles() {
 
 	// NOTE: is the rule track-by-track or on average in the release? what about the stupid "silent" tracks in some releases before a hidden song?
 	minAvgBitRate, maxAvgBitRate := p.release.CheckMinMaxBitrates()
-	p.ConditionCheck(LevelCritical, "2.1.3", "All tracks have at least 192kbps bitrate (between "+strconv.Itoa(minAvgBitRate/1000)+"kbps and "+strconv.Itoa(maxAvgBitRate/1000)+"kbps).", "At least one file has a lower than 192kbps bit rate: "+strconv.Itoa(minAvgBitRate), minAvgBitRate > 192000)
+	p.ConditionCheck(LevelCritical, "2.1.3", fmt.Sprintf(OKBitRate, strconv.Itoa(minAvgBitRate/1000), strconv.Itoa(maxAvgBitRate/1000)), fmt.Sprintf(KOBitRate, strconv.Itoa(minAvgBitRate/1000)), minAvgBitRate > 192000)
 
 	// checking for mutt rip
 	forbidden := fs.GetAllowedFilesByExt(p.release.Path, nonFlacMusicExtensions)
@@ -63,44 +64,43 @@ func (p *Propolis) CheckMusicFiles() {
 
 	// checking for id3v1 tags
 	err = p.release.CheckForID3v1Tags()
-	p.ErrorCheck(LevelWarning, internalRule, "No ID3v1 tags detected in the first track.", "The first track contains ID3v1 tags at the end of the file.", err, AppendError)
+	p.ErrorCheck(LevelWarning, internalRule, OKID3v1Tags, KOID3v1Tags, err, AppendError)
 
 	// checking for uncompressed flacs
 	err = p.release.CheckCompression()
-	p.ErrorCheck(LevelCritical, "2.2.10.10", "First track does not seem to be uncompressed FLAC.", "Error checking for uncompressed FLAC.", err, DoNotAppendError)
+	p.ErrorCheck(LevelCritical, "2.2.10.10", OKUncompressedFlac, KOUncompressedFlac, err, DoNotAppendError)
 	if err != nil {
 		if errors.Is(err, flac.ErrorUncompressed) {
-			p.ErrorCheck(LevelCritical, "2.2.10.10", "", ArrowHeader+"The first track is uncompressed FLAC", err, AppendError)
+			p.ErrorCheck(LevelCritical, "2.2.10.10", BlankBecauseImpossible, ArrowHeader+KOUncompressed, err, AppendError)
 		} else {
-			p.ErrorCheck(LevelCritical, "2.2.10.10", "", ArrowHeader+"Other error", err, AppendError)
+			p.ErrorCheck(LevelCritical, "2.2.10.10", BlankBecauseImpossible, ArrowHeader+OtherError, err, AppendError)
 		}
 	}
 }
 
 func (p *Propolis) CheckOrganization(snatched bool) {
+	// checking for overly long paths
 	notTooLong := fs.GetMaxPathLength(p.release.Path) < 180
-	p.ConditionCheck(LevelCritical, "2.3.12", "Maximum character length is less than 180 characters.", "Maximum character length exceeds 180 characters.", notTooLong)
+	p.ConditionCheck(LevelCritical, "2.3.12", OKMaxCharacterLength, KOMaxCharacterLength, notTooLong)
 	if !notTooLong {
 		for _, f := range fs.GetExceedinglyLongPaths(p.release.Path, 180) {
-			p.ConditionCheck(LevelCritical, "2.3.12", "", ArrowHeader+"Too long: "+f, false)
+			p.ConditionCheck(LevelCritical, "2.3.12", "", ArrowHeader+fmt.Sprintf(KOTooLong, utf8.RuneCountInString(f), f), false)
 		}
 	}
-
 	// checking for only allowed extensions are used
 	forbidden := fs.GetForbiddenFilesByExt(p.release.Path, allowedExtensions)
 	if snatched {
 		forbidden = IgnoreVarroaFiles(forbidden)
 	}
-	p.ConditionCheck(LevelCritical, "wiki#371", "Release only contains allowed extensions. ", "Release contains forbidden extensions, which would be rejected by upload.php.", len(forbidden) == 0)
+	p.ConditionCheck(LevelCritical, "wiki#371", OKAllowedExtensions, KOAllowedExtensions, len(forbidden) == 0)
 	if len(forbidden) != 0 {
-		p.ConditionCheck(LevelCritical, "wiki#371", "", ArrowHeader+"Forbidden files: "+strings.Join(forbidden, ", "), false)
+		p.ConditionCheck(LevelCritical, "wiki#371", "", ArrowHeader+fmt.Sprintf(KOForbiddenFiles, strings.Join(forbidden, ", ")), false)
 	}
-
 	// checking for empty dirs or uselessly nested folders
-	p.ConditionCheck(LevelCritical, "2.3.3", "Release does not have empty folders or unnecessary nested folders.", "Release has empty folders or unnecessary nested folders.", !fs.HasEmptyNestedFolders(p.release.Path))
-	p.ConditionCheck(LevelCritical, "2.3.20", "No leading space/dot found in files and folders.", "Release has files or folders with a leading space or dot.", len(fs.GetFilesAndFoldersByPrefix(p.release.Path, forbiddenLeadingCharacters)) == 0)
+	p.ConditionCheck(LevelCritical, "2.3.3", OKEmptyFolders, KOEmptyFolders, !fs.HasEmptyNestedFolders(p.release.Path))
+	p.ConditionCheck(LevelCritical, "2.3.20", OKNoLeadingDot, KONoLeadingDot, len(fs.GetFilesAndFoldersByPrefix(p.release.Path, forbiddenLeadingCharacters)) == 0)
 	err := p.release.CheckMultiDiscOrganization()
-	p.ErrorCheck(LevelCritical, "2.3.15", "Release is not multi-disc, or files from multiple discs are either in top folder with disc numbers in filenames, or in dedicated subfolders.", "Tracks from this multi-disc release are incorrectly organized", err, AppendError)
+	p.ErrorCheck(LevelCritical, "2.3.15", OKMultiDiscOrganization, KOMultiDiscOrganization, err, AppendError)
 }
 
 func (p *Propolis) CheckTags() {
