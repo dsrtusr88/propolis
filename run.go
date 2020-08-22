@@ -1,12 +1,8 @@
 package propolis
 
 import (
-	"errors"
 	"path/filepath"
-	"strconv"
 
-	"gitlab.com/catastrophic/assistance/flac"
-	"gitlab.com/catastrophic/assistance/fs"
 	"gitlab.com/catastrophic/assistance/logthis"
 	"gitlab.com/catastrophic/assistance/music"
 	"gitlab.com/catastrophic/assistance/ui"
@@ -28,40 +24,31 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput, stdOutpu
 		metadataDir = filepath.Join(path, "Metadata")
 	}
 	release := music.NewWithExternalMetadata(path, metadataDir)
-	totalSize := float64(fs.GetTotalSize(release.Path)) / (1024 * 1024)
 
 	// creating overall check struct and adding the first checks
-	analysis := NewPropolis(path, problemsOnly)
+	analysis := NewPropolis(path, release, problemsOnly)
 	if jsonOutput || !stdOutput {
 		analysis.ToggleStdOutput(false)
 	}
 
 	// general checks
-	logthis.Info(titleHeader+ui.BlueBoldUnderlined("Checking Path is a music release"), logthis.NORMAL)
-	err := release.ParseFiles()
-
-	analysis.ErrorCheck(LevelCritical, "2.3.1", "Release contains FLAC files", "Error parsing files", err, DoNotAppendError)
-	if err != nil {
-		analysis.ConditionCheck(LevelCritical, "2.2.10.8", ArrowHeader+"At least one FLAC has illegal ID3v2 tags.", ArrowHeader+err.Error(), errors.Is(err, flac.ErrNoFlacHeader))
-	}
-	analysis.ConditionCheck(LevelInfo, internalRule, "Total size of release folder: "+strconv.FormatFloat(totalSize, 'f', 2, 32)+"Mb.", "", true)
-
+	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleRelease), logthis.NORMAL)
+	analysis.CheckRelease()
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleMusic), logthis.NORMAL)
-	analysis = CheckMusicFiles(release, analysis)
-
+	analysis.CheckMusicFiles()
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleOrganization), logthis.NORMAL)
-	analysis = CheckOrganization(release, snatched, analysis)
-
+	analysis.CheckOrganization(snatched)
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleTags), logthis.NORMAL)
-	analysis = CheckTags(release, analysis)
+	analysis.CheckTags()
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleFilenames), logthis.NORMAL)
-	analysis = CheckFilenames(release, snatched, analysis)
+	analysis.CheckFilenames(snatched)
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleExtraFiles), logthis.NORMAL)
-	analysis = CheckExtraFiles(release, analysis)
+	analysis.CheckExtraFiles()
 	logthis.Info(titleHeader+ui.BlueBoldUnderlined(TitleFoldername), logthis.NORMAL)
-	analysis = CheckFolderName(release, analysis)
+	analysis.CheckFolderName()
 
 	var overviewFile string
+	var err error
 	if !disableSpecs {
 		logthis.Info(titleHeader+ui.BlueBoldUnderlined("Generating spectrograms"), logthis.NORMAL)
 		overviewFile, err = GenerateSpectrograms(release, !jsonOutput)

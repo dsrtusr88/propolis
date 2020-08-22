@@ -10,11 +10,13 @@ import (
 	"strings"
 
 	"gitlab.com/catastrophic/assistance/logthis"
+	"gitlab.com/catastrophic/assistance/music"
 )
 
 type Propolis struct {
 	Path         string   `json:"path"`
 	Checks       []*Check `json:"checks"`
+	release      *music.Release
 	stdOutput    bool
 	problemsOnly bool
 	buffer       bytes.Buffer
@@ -23,8 +25,8 @@ type Propolis struct {
 	Warnings     int
 }
 
-func NewPropolis(path string, problemsOnly bool) *Propolis {
-	return &Propolis{Path: path, stdOutput: true, problemsOnly: problemsOnly}
+func NewPropolis(path string, release *music.Release, problemsOnly bool) *Propolis {
+	return &Propolis{Path: path, release: release, stdOutput: true, problemsOnly: problemsOnly}
 }
 
 func (p *Propolis) ToggleStdOutput(enabled bool) {
@@ -89,7 +91,7 @@ func (p *Propolis) ListWarnings() string {
 	return strings.Join(warnings, " | ")
 }
 
-// Output the complete log
+// Output the complete log.
 func (p *Propolis) Output() string {
 	var output string
 	for _, c := range p.Checks {
@@ -108,7 +110,7 @@ func (p *Propolis) SaveOuput(dir, version string) error {
 	return ioutil.WriteFile(outputFile, []byte(p.Output()), 0600)
 }
 
-// JSONOutput the complete log in JSON
+// JSONOutput the complete log in JSON.
 func (p Propolis) JSONOutput() string {
 	p.ParseResults()
 	// marshallIndentint *p itself

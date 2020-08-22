@@ -4,6 +4,7 @@ const (
 	minTitleSize = 10
 	Size1024KiB  = 1024 * 1024
 
+	TitleRelease      = "Checking Path is a music release"
 	TitleMusic        = "Checking music files"
 	TitleOrganization = "Checking organization"
 	TitleTags         = "Checking tags"
