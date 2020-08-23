@@ -174,6 +174,7 @@ github.com/huandu/xstrings v1.2.0 h1:yPeWdRnmynF7p+lLYz0H2tthW9lqhMJrQV/U7yy4wX0
 github.com/huandu/xstrings v1.2.0/go.mod h1:DvyZB1rfVYsBIigL8HwpZgxHwXozlTgGqn63UyNX5k4=
 github.com/icza/bitio v1.0.0 h1:squ/m1SHyFeCA6+6Gyol1AxV9nmPPlJFT8c2vKdj3U8=
 github.com/icza/bitio v1.0.0/go.mod h1:0jGnlLAx8MKMr9VGnn/4YrvZiprkvBelsVIbA9Jjr9A=
+github.com/icza/mighty v0.0.0-20180919140131-cfd07d671de6 h1:8UsGZ2rr2ksmEru6lToqnXgA8Mz1DP11X4zSJ159C3k=
 github.com/icza/mighty v0.0.0-20180919140131-cfd07d671de6/go.mod h1:xQig96I1VNBDIWGCdTt54nHt6EeI639SmHycLYL7FkA=
 github.com/jessevdk/go-flags v0.0.0-20141203071132-1679536dcc89/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
@@ -287,10 +288,8 @@ github.com/willf/bitset v1.1.10/go.mod h1:RjeCKbqT1RxIR/KWY6phxZiaY1IyutSBfGjNPy
 github.com/willf/bloom v0.0.0-20170505221640-54e3b963ee16/go.mod h1:MmAltL9pDMNTrvUkxdg0k0q5I0suxmuwp3KbyrZLOZ8=
 github.com/willf/bloom v2.0.3+incompatible/go.mod h1:MmAltL9pDMNTrvUkxdg0k0q5I0suxmuwp3KbyrZLOZ8=
 gitlab.com/catastrophic/assistance v0.29.0/go.mod h1:a8EalwiULerO29cJ/t1HZYcfGlnFAe6jvZmiSHIwY1Q=
-gitlab.com/catastrophic/assistance v0.37.3 h1:nO6wV7F5gZtpGuVsCWsqTyU+XsCHDoyTX1QSXDRFQUM=
-gitlab.com/catastrophic/assistance v0.37.3/go.mod h1:lZW6iKYflKt4aLss6Q2SObrjWYF4Y4YbNk7pOqQtA9g=
-gitlab.com/catastrophic/assistance v0.38.0 h1:8iA+7CqRGPV0kfCuoqKqaSF5Wr3kvwnIWrl9dmlVJOk=
-gitlab.com/catastrophic/assistance v0.38.0/go.mod h1:7fUkMMJPLRkK86LwaoIimmQQJKvLjUKKK0PKQxbxBtI=
+gitlab.com/catastrophic/assistance v0.38.1 h1:A+oPT72MkXVIWTSjB0bfYU3B+DHpoqm1a6wqRbnQ26I=
+gitlab.com/catastrophic/assistance v0.38.1/go.mod h1:7fUkMMJPLRkK86LwaoIimmQQJKvLjUKKK0PKQxbxBtI=
 gitlab.com/catastrophic/gotabulate v0.0.0-20190228104527-d3d77fbbb3a1 h1:nKQdLjYLARydXRsNOfHxTB0TaOZdKpp3a/P6dc3ySCE=
 gitlab.com/catastrophic/gotabulate v0.0.0-20190228104527-d3d77fbbb3a1/go.mod h1:poSJSlChz9NabfWFYQ1Dl+TBXn/q/wvs3OpQNaDIreU=
 gitlab.com/passelecasque/obstruction v0.12.2 h1:CR8PAzvGGIFELUwAkchx73rE2ASBC4exV/jtZ/I9aA4=
