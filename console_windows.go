@@ -5,7 +5,7 @@ var (
 )
 
 const (
-	arrowHeader   = "-> "
+	ArrowHeader   = "-> "
 	internalRule  = " -- "
 	OKString      = "OK"
 	KOString      = "KO"
