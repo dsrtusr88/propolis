@@ -28,9 +28,9 @@ func (p *Propolis) CheckRelease() {
 }
 
 func (p *Propolis) CheckMusicFiles() {
-	// running the checks
+	// checking the encoder
 	p.ErrorCheck(LevelWarning, "2.1.6", OKSameEncoder, KOSameEncoder, p.release.CheckVendor(), AppendError)
-
+	// checking for consistency in bit depth
 	isConsistent, bitDepth := p.release.CheckConsistentBitDepth()
 	p.ConditionCheck(LevelWarning, "2.1.6", fmt.Sprintf(OKSameBitDepth, bitDepth), KOSameBitDepth, isConsistent)
 	if !isConsistent {
@@ -40,21 +40,18 @@ func (p *Propolis) CheckMusicFiles() {
 		bitD, _ := strconv.Atoi(bitDepth)
 		p.ConditionCheck(LevelCritical, "2.1.1", ArrowHeader+OKValidBitDepth, ArrowHeader+KOValidBitDepth, bitD <= 24)
 	}
-
+	// checking for consistency in sample rate
 	isConsistent, sampleRate := p.release.CheckConsistentSampleRate()
 	p.ConditionCheck(LevelWarning, "2.1.6", fmt.Sprintf(OKSameSampleRate, sampleRate), KOSameSampleRate, isConsistent)
 	sr, _ := strconv.Atoi(sampleRate)
 	p.ConditionCheck(LevelCritical, "2.1.1", ArrowHeader+OKValidSampleRate, ArrowHeader+KOValidSampleRate, sr <= 192000)
-
 	// NOTE: is the rule track-by-track or on average in the release? what about the stupid "silent" tracks in some releases before a hidden song?
 	minAvgBitRate, maxAvgBitRate := p.release.CheckMinMaxBitrates()
 	p.ConditionCheck(LevelCritical, "2.1.3", fmt.Sprintf(OKBitRate, strconv.Itoa(minAvgBitRate/1000), strconv.Itoa(maxAvgBitRate/1000)), fmt.Sprintf(KOBitRate, strconv.Itoa(minAvgBitRate/1000)), minAvgBitRate > 192000)
-
-	// checking for mutt rip
+	// checking if mutt rip
 	forbidden := fs.GetAllowedFilesByExt(p.release.Path, nonFlacMusicExtensions)
 	p.ConditionCheck(LevelCritical, "2.1.6.3", OKMuttRip, fmt.Sprintf(KOMuttRip, strings.Join(forbidden, ",")), len(forbidden) == 0)
-
-	// checking flacs
+	// checking flac integrity
 	err := p.release.Check()
 	p.ErrorCheck(LevelCritical, "2.2.10.8", integrityCheckOK, KOIntegrityCheck, err, DoNotAppendError)
 	if err != nil {
@@ -64,11 +61,9 @@ func (p *Propolis) CheckMusicFiles() {
 			p.ErrorCheck(LevelCritical, internalRule, "", ArrowHeader+KOIntegrity, err, AppendError)
 		}
 	}
-
 	// checking for id3v1 tags
 	err = p.release.CheckForID3v1Tags()
 	p.ErrorCheck(LevelWarning, internalRule, OKID3v1Tags, KOID3v1Tags, err, DoNotAppendError)
-
 	// checking for uncompressed flacs
 	err = p.release.CheckCompression()
 	p.ErrorCheck(LevelCritical, "2.2.10.10", OKUncompressedFlac, KOUncompressedFlac, err, DoNotAppendError)
@@ -78,6 +73,12 @@ func (p *Propolis) CheckMusicFiles() {
 		} else {
 			p.ErrorCheck(LevelCritical, "2.2.10.10", BlankBecauseImpossible, ArrowHeader+OtherError, err, AppendError)
 		}
+	}
+	// checking for MQA encoding
+	if len(p.release.Flacs) != 0 {
+		p.ConditionCheck(LevelCritical, "upload#DNU", OKNoMQAMetadata, KONoMQAMetadata, !p.release.Flacs[0].CheckForMQAMetadata())
+		isMQA, _ := p.release.Flacs[0].CheckForMQASyncword()
+		p.ConditionCheck(LevelCritical, "upload#DNU", OKNoMQASyncword, KONoMQASyncword, !isMQA)
 	}
 }
 

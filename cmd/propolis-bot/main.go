@@ -4,10 +4,6 @@ import (
 	"fmt"
 )
 
-const (
-	errorMsg = "error"
-)
-
 var Version = "dev"
 
 func main() {
