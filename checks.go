@@ -165,7 +165,7 @@ func (p *Propolis) CheckFolderName() {
 	title := tags.Album
 
 	// checking title is in folder name
-	p.ConditionCheck(LevelCritical, "2.3.2", OKTitleInFoldername, KOTitleInFoldername, strings.Contains(folderName, strings.ToLower(title)))
+	p.ConditionCheck(LevelCritical, "2.3.2", OKTitleInFoldername, KOTitleInFoldername, flac.StringContainsStartOfAnother(folderName, title, 30))
 	// checking artists are in the folder name
 	artists := tags.AlbumArtist
 	if len(artists) == 0 {
