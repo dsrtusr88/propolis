@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-chat-bot/bot"
 	ircevent "github.com/thoj/go-ircevent"
+	"gitlab.com/catastrophic/assistance/logthis"
 )
 
 // BotConfig must contain the necessary data to connect to an IRC server.
@@ -93,7 +94,7 @@ func SetUp(c *BotConfig) *bot.Bot {
 	})
 	ircConn.AddCallback("PRIVMSG", func(e *ircevent.Event) {
 		if e.Nick != c.Nick {
-			fmt.Println("Ignoring command from " + e.Nick)
+			logthis.Info("Ignoring command from "+e.Nick, logthis.VERBOSEST)
 			return
 		}
 		b.MessageReceived(
