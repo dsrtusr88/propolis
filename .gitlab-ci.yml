@@ -12,6 +12,7 @@ compiled_dev:
   script:
     - make all
     - make build
+    - make build-bot
   after_script:
     - bash <(curl -s https://codecov.io/bash) -t "${CODECOV_TOKEN}"
   artifacts:
@@ -20,6 +21,7 @@ compiled_dev:
       - propolis_x86
       - propolis_darwin
       - propolis_windows.exe
+      - propolis-bot
     name: "propolis-dev-${CI_COMMIT_REF_NAME}"
     expire_in: 4 weeks
   except:
@@ -30,6 +32,7 @@ compiled_release:
   script:
     - make all
     - make build
+    - make build-bot
   after_script:
     - bash <(curl -s https://codecov.io/bash) -t "${CODECOV_TOKEN}"
   artifacts:
@@ -38,6 +41,7 @@ compiled_release:
       - propolis_x86
       - propolis_darwin
       - propolis_windows.exe
+      - propolis-bot
     name: "propolis-${CI_COMMIT_REF_NAME}"
   only:
     - tags

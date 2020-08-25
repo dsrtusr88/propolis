@@ -53,7 +53,7 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput, stdOutpu
 
 		if !disableSpecs {
 			logthis.Info(titleHeader+ui.BlueBoldUnderlined("Generating spectrograms"), logthis.NORMAL)
-			overviewFile, err = GenerateSpectrograms(release, !jsonOutput)
+			overviewFile, err = GenerateSpectrograms(release, !stdOutput || !jsonOutput)
 			if err != nil {
 				logthis.Error(err, logthis.NORMAL)
 			} else {
