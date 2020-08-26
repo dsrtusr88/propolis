@@ -84,10 +84,13 @@ func (p *Propolis) CheckMusicFiles() {
 
 func (p *Propolis) CheckOrganization(snatched bool) {
 	// checking for overly long paths
-	notTooLong := fs.GetMaxPathLength(p.release.Path) < 180
-	p.ConditionCheck(LevelCritical, "2.3.12", OKMaxCharacterLength, KOMaxCharacterLength, notTooLong)
-	if !notTooLong {
-		for _, f := range fs.GetExceedinglyLongPaths(p.release.Path, 180) {
+	longFiles := fs.GetExceedinglyLongPaths(p.release.Path, 180)
+	if snatched {
+		longFiles = IgnoreVarroaFiles(longFiles)
+	}
+	p.ConditionCheck(LevelCritical, "2.3.12", OKMaxCharacterLength, KOMaxCharacterLength, len(longFiles) == 0)
+	if len(longFiles) != 0 {
+		for _, f := range longFiles {
 			p.ConditionCheck(LevelCritical, "2.3.12", "", ArrowHeader+fmt.Sprintf(KOTooLong, utf8.RuneCountInString(f), f), false)
 		}
 	}

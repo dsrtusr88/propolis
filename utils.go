@@ -21,7 +21,7 @@ func CheckExternalBinaries(externalBinaries ...string) error {
 func IgnoreVarroaFiles(files []string) []string {
 	var clean []string
 	for _, e := range files {
-		if !strings.Contains(e, "TrackerMetadata") {
+		if !strings.Contains(e, "TrackerMetadata") && !strings.Contains(e, "Metadata") {
 			clean = append(clean, e)
 		}
 	}
