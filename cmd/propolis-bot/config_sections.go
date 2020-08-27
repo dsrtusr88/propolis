@@ -8,6 +8,13 @@ import (
 	"gitlab.com/catastrophic/assistance/logthis"
 )
 
+const (
+	centralRole    = "central"
+	nodeRole       = "node"
+	defaultChannel = "#propolis-announce"
+	centralBot     = "bbb"
+)
+
 type ConfigGeneral struct {
 	LogLevel      int    `yaml:"log_level"`
 	PrivateBinURL string `yaml:"privatebin_url"`
@@ -36,10 +43,23 @@ type ConfigIrc struct {
 	BotName          string `yaml:"bot_name"`
 	GateKeeper       string `yaml:"gatekeeper"`
 	Channel          string `yaml:"channel"`
+	Role             string `yaml:"role"`
+	CentralBot       string `yaml:"central_bot"`
 }
 
 func (ci *ConfigIrc) check() error {
 	// TODO keep the whole section optional
+	if ci.Role == "" {
+		ci.Role = nodeRole
+	} else if ci.Role != nodeRole && ci.Role != centralRole {
+		return errors.New("invalid role")
+	}
+	if ci.Channel == "" {
+		ci.Channel = defaultChannel
+	}
+	if ci.CentralBot == "" {
+		ci.CentralBot = centralBot
+	}
 	return nil
 }
 
@@ -53,5 +73,7 @@ func (ci *ConfigIrc) String() string {
 	txt += "\tBot Name: " + ci.BotName + "\n"
 	txt += "\tGateKeeper: " + ci.GateKeeper + "\n"
 	txt += "\tChannel: " + ci.Channel + "\n"
+	txt += "\tRole: " + ci.Role + "\n"
+	txt += "\tCentral Bot: " + ci.CentralBot + "\n"
 	return txt
 }

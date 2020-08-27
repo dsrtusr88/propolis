@@ -10,5 +10,4 @@ irc:
   username : user
   bot_name: mybot                 # the actual user will be the tracker user
   gatekeeper: Bee                 # drone
-  channel: "#beeees"
 
