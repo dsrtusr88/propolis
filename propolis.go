@@ -71,14 +71,18 @@ func (p *Propolis) ErrorCheck(level Level, rule, OKString, KOString string, err 
 	p.Checks = append(p.Checks, check)
 }
 
-func (p *Propolis) ListErrors() string {
+func (p *Propolis) AllErrors() []string {
 	var errors []string
 	for _, c := range p.Checks {
 		if c.Result == KO {
 			errors = append(errors, c.ResultComment)
 		}
 	}
-	return strings.Join(errors, " | ")
+	return errors
+}
+
+func (p *Propolis) ListErrors() string {
+	return strings.Join(p.AllErrors(), " | ")
 }
 
 func (p *Propolis) ListWarnings() string {
