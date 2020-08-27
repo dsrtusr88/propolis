@@ -3,6 +3,7 @@ module gitlab.com/passelecasque/propolis
 go 1.13
 
 require (
+	github.com/dgraph-io/badger/v2 v2.2007.1
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
 	github.com/go-chat-bot/bot v0.0.0-20200527181414-ef71c72a524a
 	github.com/gorilla/mux v1.6.2

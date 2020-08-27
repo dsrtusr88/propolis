@@ -8,8 +8,10 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/dgraph-io/badger/v2"
 	"github.com/go-chat-bot/bot"
 	ircevent "github.com/thoj/go-ircevent"
 	"gitlab.com/catastrophic/assistance/logthis"
@@ -36,7 +38,10 @@ var (
 	nickStartRE *regexp.Regexp
 )
 
-const protocol = "irc"
+const (
+	protocol = "irc"
+	dbFile   = "propolis.db"
+)
 
 func responseHandler(target string, message string, sender *bot.User) {
 	channel := target
@@ -62,7 +67,7 @@ func getServerName(server string) string {
 // SetUp returns a bot for irc according to the BotConfig, but does not run it.
 // When you are ready to run the bot, call Run(nil).
 // This is useful if you need a pointer to the bot, otherwise you can simply call Run().
-func SetUp(c *BotConfig) *bot.Bot {
+func SetUp(c *BotConfig, db *badger.DB) *bot.Bot {
 	ircConn = ircevent.IRC(c.User, c.Nick)
 	ircConn.RealName = c.RealName
 	ircConn.Password = c.Password
@@ -92,7 +97,27 @@ func SetUp(c *BotConfig) *bot.Bot {
 			ircConn.Join(channel)
 		}
 	})
+
+	var mutex sync.Mutex
 	ircConn.AddCallback("PRIVMSG", func(e *ircevent.Event) {
+		message := nickStartRE.ReplaceAllString(e.Message(), "")
+		if config.IRC.Role == centralRole {
+			path, idOrError, parsed, err := ParseNodeMessage(e.Nick, message)
+			if err != nil {
+				logthis.Error(err, logthis.NORMAL)
+			} else {
+				mutex.Lock()
+				// if not in DB or has no torrent ID (== is error message)
+				if !IsKnown(db, path, idOrError) {
+					ircConn.Privmsg(config.IRC.Channel, parsed)
+					if err := AddRelease(db, path, idOrError); err != nil {
+						logthis.Error(err, logthis.VERBOSEST)
+					}
+				}
+				mutex.Unlock()
+			}
+			return
+		}
 		if e.Nick != c.Nick {
 			logthis.Info("Ignoring command from "+e.Nick, logthis.VERBOSEST)
 			return
@@ -104,7 +129,7 @@ func SetUp(c *BotConfig) *bot.Bot {
 				Channel:   e.Arguments[0],
 				IsPrivate: e.Arguments[0] == ircConn.GetNick()},
 			&bot.Message{
-				Text: nickStartRE.ReplaceAllString(e.Message(), ""),
+				Text: message,
 			},
 			&bot.User{
 				ID:       e.Host,
@@ -114,19 +139,21 @@ func SetUp(c *BotConfig) *bot.Bot {
 	return b
 }
 
-// SetUpConn wraps SetUp and returns ircConn in addition to bot.
-func SetUpConn(c *BotConfig) (*bot.Bot, *ircevent.Connection) {
-	return SetUp(c), ircConn
-}
-
 // Run reads the BotConfig, connect to the specified IRC server and starts the bot.
 // The bot will automatically join all the channels specified in the configuration.
 func Run(c *BotConfig) {
+	db, err := badger.Open(badger.DefaultOptions(dbFile))
+	if err != nil {
+		logthis.Error(err, logthis.NORMAL)
+		return
+	}
+	defer db.Close()
+
 	if c != nil {
-		SetUp(c)
+		SetUp(c, db)
 	}
 
-	err := ircConn.Connect(c.Server)
+	err = ircConn.Connect(c.Server)
 	if err != nil {
 		log.Fatal(err)
 	}
