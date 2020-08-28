@@ -111,7 +111,11 @@ func (p *Propolis) CheckOrganization(snatched bool) {
 }
 
 func (p *Propolis) CheckTags() {
-	p.ErrorCheck(LevelCritical, "2.3.16.1/4", OKRequiredTags, KORequiredTags, p.release.CheckTags(), DoNotAppendError)
+	errs := p.release.CheckMinimalTags()
+	p.ConditionCheck(LevelCritical, "2.3.16.1/4", OKRequiredTags, KORequiredTags, len(errs) == 0)
+	for _, e := range errs {
+		p.ErrorCheck(LevelCritical, "2.3.16.1/4", BlankBecauseImpossible, ArrowHeader+"Error", e, AppendError)
+	}
 	p.ErrorCheck(LevelCritical, internalRule, OKMetadataSize, KOMetadataSize, p.release.CheckMaxMetadataSize(Size1024KiB), DoNotAppendError)
 	p.ConditionCheck(LevelCritical, "2.3.19", OKCoverSize, KOCoverSize, p.release.CheckMaxCoverAndPaddingSize() <= Size1024KiB)
 	p.ErrorCheck(LevelCritical, internalRule, OKConsistentTags, KOConsistentTags, p.release.CheckConsistentTags(), AppendError)
