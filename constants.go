@@ -67,7 +67,7 @@ const (
 	OKCoverSize               = "All tracks either have no embedded art, or the embedded art size is less than 1024KiB (padding included)."
 	KOCoverSize               = "At least one track has embedded art and padding exceeding the maximum allowed size of 1024 KiB."
 	OKConsistentTags          = "Release-level tags seem consistent among tracks."
-	KOConsistentTags          = "Tracks have inconsistent tags about the release."
+	KOConsistentTags          = "Tracks have inconsistent tags about the release"
 	OKConsistentAlbumArtist   = "Artist/Album artist tags seem consistent."
 	KOConsistentAlbumArtist   = "Artist/Album artist tags differ from file to file"
 	OKValidCharacters         = "Tracks filenames do not appear to contain problematic characters."
