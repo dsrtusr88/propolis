@@ -324,8 +324,8 @@ github.com/willf/bloom v0.0.0-20170505221640-54e3b963ee16/go.mod h1:MmAltL9pDMNT
 github.com/willf/bloom v2.0.3+incompatible/go.mod h1:MmAltL9pDMNTrvUkxdg0k0q5I0suxmuwp3KbyrZLOZ8=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 gitlab.com/catastrophic/assistance v0.29.0/go.mod h1:a8EalwiULerO29cJ/t1HZYcfGlnFAe6jvZmiSHIwY1Q=
-gitlab.com/catastrophic/assistance v0.38.3 h1:EsP1Hs7FQBM7F5zXiEEXfOrEBZ8ELB/+g1kJ8+Q97to=
-gitlab.com/catastrophic/assistance v0.38.3/go.mod h1:UBm96/rqXI3x/DE+nEb6F45pLupjJNuFp2iwBYMNT/g=
+gitlab.com/catastrophic/assistance v0.38.4 h1:/f2LiGS8yU9KKOYsVtqUXh8QDVW5FK7rnm8bSX+N67g=
+gitlab.com/catastrophic/assistance v0.38.4/go.mod h1:UBm96/rqXI3x/DE+nEb6F45pLupjJNuFp2iwBYMNT/g=
 gitlab.com/catastrophic/gotabulate v0.0.0-20190228104527-d3d77fbbb3a1 h1:nKQdLjYLARydXRsNOfHxTB0TaOZdKpp3a/P6dc3ySCE=
 gitlab.com/catastrophic/gotabulate v0.0.0-20190228104527-d3d77fbbb3a1/go.mod h1:poSJSlChz9NabfWFYQ1Dl+TBXn/q/wvs3OpQNaDIreU=
 gitlab.com/passelecasque/obstruction v0.12.2 h1:CR8PAzvGGIFELUwAkchx73rE2ASBC4exV/jtZ/I9aA4=

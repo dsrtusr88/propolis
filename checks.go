@@ -155,8 +155,8 @@ func (p *Propolis) CheckFilenames(snatched bool) {
 		p.ConditionCheck(LevelWarning, "2.3.13", OKTrackNumberInFilename, KOTrackNumberInFilename, p.release.CheckTrackNumbersInFilenames())
 	}
 	p.ConditionCheck(LevelCritical, "2.3.11", OKTitleInFilenames, KOTitleInFilenames, p.release.CheckFilenameContainsStartOfTitle(minTitleSize))
-	// checking filename order
-	ordered, err := p.release.CheckFilenameOrder()
+	// checking filename order with disc info
+	ordered, err := p.release.CheckFilenameOrder(true)
 	if err != nil {
 		p.ErrorCheck(LevelCritical, internalRule, BlankBecauseImpossible, KOCheckingFilenameOrder, err, AppendError)
 	} else {
