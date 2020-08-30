@@ -1,6 +1,7 @@
 general:
   log_level: 3
   privatebin_url: https://privatebin.url
+  ptpimg_key: api-key-find-it-in-ptpimg-html-source
 
 irc:
   server: irc.server.net:6697

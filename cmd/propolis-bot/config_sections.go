@@ -18,11 +18,15 @@ const (
 type ConfigGeneral struct {
 	LogLevel      int    `yaml:"log_level"`
 	PrivateBinURL string `yaml:"privatebin_url"`
+	PtpImgKey     string `yaml:"ptpimg_key"`
 }
 
 func (cg *ConfigGeneral) check() error {
 	if cg.PrivateBinURL == "" {
 		return errors.New("privatebin URL required")
+	}
+	if cg.PtpImgKey == "" {
+		return errors.New("PTPIMG API key required")
 	}
 	return logthis.CheckLevel(cg.LogLevel)
 }
@@ -31,6 +35,8 @@ func (cg *ConfigGeneral) check() error {
 func (cg *ConfigGeneral) String() string {
 	txt := "General configuration:\n"
 	txt += "\tLog level: " + strconv.Itoa(cg.LogLevel) + "\n"
+	txt += "\tPrivateBin URL: " + cg.PrivateBinURL + "\n"
+	txt += "\tPTPImg API key: " + cg.PtpImgKey + "\n"
 	return txt
 }
 
