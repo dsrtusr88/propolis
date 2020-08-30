@@ -21,10 +21,16 @@ func main() {
 	// launching the websocket server
 	go Server()
 
+	// only join a channel if central bot
+	var channels []string
+	if config.IRC.Role == centralRole {
+		channels = []string{config.IRC.Channel}
+	}
+
 	// launching the bot
 	Run(&BotConfig{
 		Server:     config.IRC.Server,
-		Channels:   []string{config.IRC.Channel},
+		Channels:   channels,
 		Nick:       config.IRC.Username,
 		User:       config.IRC.BotName,
 		RealName:   "BUSY BEE BOT",

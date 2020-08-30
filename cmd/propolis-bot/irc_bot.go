@@ -90,11 +90,13 @@ func SetUp(c *BotConfig, db *badger.DB) *bot.Bot {
 
 	ircConn.AddCallback("001", func(_ *ircevent.Event) {
 		ircConn.Privmsg("NickServ", "IDENTIFY "+c.Password)
-		time.Sleep(1000 * time.Millisecond)
-		ircConn.Privmsg(c.GateKeeper, fmt.Sprintf("enter %s %s %s", c.Channels[0], c.Nick, c.Key))
-		time.Sleep(1000 * time.Millisecond)
-		for _, channel := range c.Channels {
-			ircConn.Join(channel)
+		if config.IRC.Role == centralRole {
+			time.Sleep(1000 * time.Millisecond)
+			ircConn.Privmsg(c.GateKeeper, fmt.Sprintf("enter %s %s %s", c.Channels[0], c.Nick, c.Key))
+			time.Sleep(1000 * time.Millisecond)
+			for _, channel := range c.Channels {
+				ircConn.Join(channel)
+			}
 		}
 	})
 
