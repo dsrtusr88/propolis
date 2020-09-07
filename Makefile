@@ -16,7 +16,7 @@ fmt:
 	${GO} fmt ./...
 
 check: fmt
-	golangci-lint run
+	golangci-lint run --timeout=1m
 
 info: fmt
 	depscheck -totalonly -tests .
