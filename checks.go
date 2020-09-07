@@ -111,6 +111,11 @@ func (p *Propolis) CheckOrganization(snatched bool) {
 }
 
 func (p *Propolis) CheckTags() {
+	if len(p.release.Flacs) == 0 {
+		p.ConditionCheck(LevelCritical, internalRule, BlankBecauseImpossible, KOFlacPresent, len(p.release.Flacs) != 0)
+		return
+	}
+
 	errs := p.release.CheckMinimalTags()
 	p.ConditionCheck(LevelCritical, "2.3.16.1/4", OKRequiredTags, KORequiredTags, len(errs) == 0)
 	for _, e := range errs {
@@ -126,7 +131,7 @@ func (p *Propolis) CheckTags() {
 	// TODO album title can be different in case of multidisc -- 2.3.18.3.3
 	p.ErrorCheck(LevelWarning, internalRule, OKConsistentAlbumArtist, KOConsistentAlbumArtist, p.release.CheckAlbumArtist(), AppendError)
 	// TODO check combined tags
-	// TODO export tags to txt file
+	p.ConditionCheck(LevelWarning, "2.3.18.3", OKCombinedTrackNumber, KOCombinedTrackNumber, p.release.Flacs[0].CheckNotCombinedTrackNumber())
 }
 
 func (p *Propolis) CheckFilenames(snatched bool) {
