@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	// _ "net/http/pprof"
 	"path/filepath"
+	"runtime/debug"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -32,8 +35,19 @@ func Server() {
 	if config.IRC.Role == centralRole {
 		target = config.IRC.Channel
 	}
+
+	var ptpImgSet bool
+	ptpimg, err := imgupload.NewWithAPIKey(config.General.PtpImgKey)
+	if err != nil {
+		logthis.Error(err, logthis.NORMAL)
+	} else {
+		ptpImgSet = true
+	}
+
 	rtr := mux.NewRouter()
 	getMetadata := func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		defer debug.FreeOSMemory()
 		decoder := json.NewDecoder(r.Body)
 		var t IncomingJSON
 		err := decoder.Decode(&t)
@@ -60,15 +74,10 @@ func Server() {
 
 			// sending result to IRC bot
 			var link string
-			if overviewFile != "" {
-				ptpimg, err := imgupload.NewWithAPIKey(config.General.PtpImgKey)
+			if overviewFile != "" && ptpImgSet {
+				link, err = ptpimg.UploadLocalFile(overviewFile)
 				if err != nil {
 					logthis.Error(err, logthis.NORMAL)
-				} else {
-					link, err = ptpimg.UploadLocalFile(overviewFile)
-					if err != nil {
-						logthis.Error(err, logthis.NORMAL)
-					}
 				}
 			}
 
@@ -119,6 +128,7 @@ func Server() {
 		}
 	}
 	rtr.HandleFunc("/downloads", getMetadata).Methods("POST")
+	// rtr.PathPrefix("/debug/").Handler(http.DefaultServeMux)
 
 	// serve
 	go func() {

@@ -54,6 +54,10 @@ func (p *Propolis) ParseResults() {
 	}
 }
 
+func (p *Propolis) Clear() {
+	p.release.ClearMemory()
+}
+
 func (p *Propolis) Summary() string {
 	p.ParseResults()
 	return fmt.Sprintf("%d checks OK, %d checks KO, and %d warnings.", p.Passed, p.Errors, p.Warnings)

@@ -27,6 +27,7 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput, stdOutpu
 
 	// creating overall check struct and adding the first checks
 	analysis := NewPropolis(path, release, problemsOnly)
+	defer analysis.Clear()
 	if jsonOutput || !stdOutput {
 		analysis.ToggleStdOutput(false)
 	}
