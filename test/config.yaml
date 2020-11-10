@@ -12,3 +12,15 @@ irc:
   bot_name: mybot                 # the actual user will be the tracker user
   gatekeeper: Bee                 # drone
 
+varroa:
+  site : blue
+  token: mytoken
+  port: 8080
+  api_key: apkikey
+  tracker_url: https://blue.it
+  blacklisted_uploaders:
+    - thisguy
+    - thisotherguy
+  excluded_tags:
+    - tag1
+    - tag2

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 	"gitlab.com/catastrophic/assistance/logthis"
@@ -81,5 +82,43 @@ func (ci *ConfigIrc) String() string {
 	txt += "\tChannel: " + ci.Channel + "\n"
 	txt += "\tRole: " + ci.Role + "\n"
 	txt += "\tCentral Bot: " + ci.CentralBot + "\n"
+	return txt
+}
+
+type ConfigVarroa struct {
+	Site                 string   `yaml:"site"`
+	Token                string   `yaml:"token"`
+	Port                 int      `yaml:"port"`
+	APIKey               string   `yaml:"api_key"`
+	URL                  string   `yaml:"tracker_url"`
+	BlacklistedUploaders []string `yaml:"blacklisted_uploaders"`
+	ExcludedTags         []string `yaml:"excluded_tags"`
+}
+
+func (cv *ConfigVarroa) check() error {
+	if cv.Site != "" && cv.Token == "" {
+		return errors.New("missing token")
+	}
+	if cv.Site == "" && cv.Token != "" {
+		return errors.New("missing site name")
+	}
+	if cv.Site != "" && cv.Port == 0 {
+		return errors.New("missing port number")
+	}
+
+	// TODO more checks
+
+	return nil
+}
+
+func (cv *ConfigVarroa) String() string {
+	txt := "Varroa configuration:\n"
+	txt += "\tSite: " + cv.Site + "\n"
+	txt += "\tToken: " + cv.Token + "\n"
+	txt += "\tPort: " + fmt.Sprintf("%d", cv.Port) + "\n"
+	txt += "\tTracker URL: " + cv.URL + "\n"
+	txt += "\tTracker API Key: " + cv.APIKey + "\n"
+	txt += "\tBlacklisted uploaders: " + strings.Join(cv.BlacklistedUploaders, ", ") + "\n"
+	txt += "\tBlacklisted tags: " + strings.Join(cv.ExcludedTags, ", ") + "\n"
 	return txt
 }

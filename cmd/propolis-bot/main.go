@@ -4,7 +4,15 @@ import (
 	"fmt"
 )
 
+const (
+	fullName = "propolisBot"
+)
+
 var Version = "dev"
+
+func userAgent() string {
+	return fullName + "/" + Version
+}
 
 func main() {
 	var err error

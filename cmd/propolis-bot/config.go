@@ -19,9 +19,11 @@ const (
 )
 
 type Config struct {
-	General       *ConfigGeneral
-	IRC           *ConfigIrc
-	IrcConfigured bool
+	General          *ConfigGeneral
+	IRC              *ConfigIrc
+	Varroa           *ConfigVarroa
+	IrcConfigured    bool
+	VarroaConfigured bool
 }
 
 func NewConfig(path string) (*Config, error) {
@@ -78,9 +80,15 @@ func (c *Config) check() error {
 
 	if c.IRC != nil {
 		if err := c.IRC.check(); err != nil {
-			return errors.Wrap(err, "Error reading Metadata configuration")
+			return errors.Wrap(err, "Error reading IRC configuration")
 		}
 		c.IrcConfigured = true
+	}
+	if c.Varroa != nil {
+		if err := c.Varroa.check(); err != nil {
+			return errors.Wrap(err, "Error reading Varroa configuration")
+		}
+		c.VarroaConfigured = true
 	}
 	return nil
 }

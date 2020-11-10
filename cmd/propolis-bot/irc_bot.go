@@ -106,7 +106,7 @@ func SetUp(c *BotConfig, db *badger.DB) *bot.Bot {
 		if config.IRC.Role == centralRole {
 			path, idOrError, parsed, err := ParseNodeMessage(e.Nick, message)
 			if err != nil {
-				logthis.Error(err, logthis.NORMAL)
+				logthis.Error(err, logthis.VERBOSEST)
 			} else {
 				mutex.Lock()
 				// if not in DB or has no torrent ID (== is error message)
@@ -117,12 +117,14 @@ func SetUp(c *BotConfig, db *badger.DB) *bot.Bot {
 					}
 				}
 				mutex.Unlock()
+				return
 			}
-			return
-		}
-		if e.Nick != c.Nick {
-			logthis.Info("Ignoring command from "+e.Nick, logthis.VERBOSEST)
-			return
+		} else {
+			// if not the central bot, ignore commands
+			if e.Nick != c.Nick {
+				logthis.Info("Ignoring command from "+e.Nick, logthis.VERBOSEST)
+				return
+			}
 		}
 		b.MessageReceived(
 			&bot.ChannelData{
