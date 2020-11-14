@@ -2,14 +2,19 @@ package main
 
 import (
 	"io/ioutil"
+	"net/http"
 	"sync"
+	"time"
 
 	"github.com/pkg/errors"
 	"gitlab.com/catastrophic/assistance/logthis"
+	"gitlab.com/passelecasque/obstruction/tracker"
 	yaml "gopkg.in/yaml.v2"
 )
 
 var config *Config
+var gazelle *tracker.Gazelle
+var httpClient *http.Client
 var onceConfig sync.Once
 
 const (
@@ -37,6 +42,18 @@ func NewConfig(path string) (*Config, error) {
 		}
 		// set the global pointer once everything is OK.
 		config = newConf
+
+		// launching tracker
+		gazelle, newConfigErr = tracker.NewGazelle(config.Varroa.Site, config.Varroa.URL, "", "", "", "", config.Varroa.APIKey, userAgent())
+		if newConfigErr != nil {
+			return
+		}
+		gazelle.StartRateLimiter()
+		newConfigErr = gazelle.Login()
+
+		// creating http client
+		httpClient = &http.Client{Timeout: time.Second * 10}
+		return
 	})
 	return config, newConfigErr
 }
