@@ -226,7 +226,13 @@ func (p *Propolis) CheckFolderName() {
 	}
 	// checking if source is mentioned
 	logsAndCues := fs.GetAllowedFilesByExt(p.release.Path, []string{".log", ".cue"})
-	if len(logsAndCues) != 0 {
+	var cleanLogsAndCues []string
+	for _, f := range logsAndCues {
+		if !strings.Contains(f, "propolis") {
+			cleanLogsAndCues = append(cleanLogsAndCues, f)
+		}
+	}
+	if len(cleanLogsAndCues) != 0 {
 		p.ConditionCheck(LevelWarning, "2.3.2", OKCDInFoldername, KOCDInFoldername, strings.Contains(folderName, "cd"))
 	} else {
 		p.ConditionCheck(LevelWarning, "2.3.2", OKWEBInFoldername, KOWEBInFoldername, strings.Contains(folderName, "web"))

@@ -124,7 +124,12 @@ func (p *Propolis) Tags() string {
 
 func (p *Propolis) SaveOuput(dir, version string) error {
 	// TODO check dir
-	outputFile := filepath.Join(dir, fmt.Sprintf("propolis_%s.log", version))
+	var outputFile string
+	if version == "" {
+		outputFile = filepath.Join(dir, "propolis.log")
+	} else {
+		outputFile = filepath.Join(dir, fmt.Sprintf("propolis_%s.log", version))
+	}
 	if err := ioutil.WriteFile(outputFile, []byte(p.Output(false)), 0600); err != nil {
 		return err
 	}
