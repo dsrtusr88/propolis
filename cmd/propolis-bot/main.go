@@ -21,6 +21,8 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
+	defer db.Close()
+
 	if !config.IrcConfigured {
 		fmt.Println("irc section is not configured")
 		return
