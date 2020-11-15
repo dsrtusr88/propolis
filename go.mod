@@ -11,8 +11,9 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
 	gitlab.com/catastrophic/assistance v0.39.4
-	gitlab.com/passelecasque/obstruction v0.12.2
+	gitlab.com/passelecasque/obstruction v0.15.0
 	gopkg.in/yaml.v2 v2.2.8
 )
 
 // replace gitlab.com/catastrophic/assistance => ../../catastrophic/assistance
+// replace gitlab.com/passelecasque/obstruction => ../obstruction
