@@ -27,3 +27,18 @@ func IgnoreVarroaFiles(files []string) []string {
 	}
 	return clean
 }
+
+func simplifyBullet(bullet string) string {
+	switch bullet {
+	case OKString:
+		return "OK"
+	case KOString:
+		return "KO"
+	case WarningString:
+		return "!!"
+	case NeutralString:
+		return "--"
+	default:
+		return "  "
+	}
+}
