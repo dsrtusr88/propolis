@@ -100,14 +100,19 @@ func (p *Propolis) ListWarnings() string {
 }
 
 // Output the complete log.
-func (p *Propolis) Output() string {
+func (p *Propolis) Output(simple bool) string {
 	var output string
 	for _, c := range p.Checks {
 		if p.problemsOnly && (c.Result == OK || c.Result == Info || c.Result == NeutralInfo) {
 			continue
 		}
-		// no color support, use case is writing log files
-		output += c.RawString() + "\n"
+		if simple {
+			// very simple output with no special characters
+			output += c.SimpleRawString() + "\n"
+		} else {
+			// no color support, use case is writing log files
+			output += c.RawString() + "\n"
+		}
 	}
 	return output
 }
@@ -120,7 +125,7 @@ func (p *Propolis) Tags() string {
 func (p *Propolis) SaveOuput(dir, version string) error {
 	// TODO check dir
 	outputFile := filepath.Join(dir, fmt.Sprintf("propolis_%s.log", version))
-	if err := ioutil.WriteFile(outputFile, []byte(p.Output()), 0600); err != nil {
+	if err := ioutil.WriteFile(outputFile, []byte(p.Output(false)), 0600); err != nil {
 		return err
 	}
 	tagsOutputFile := filepath.Join(dir, "tags.txt")

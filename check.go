@@ -107,6 +107,10 @@ func (c *Check) RawString() string {
 	return fmt.Sprintf(" %2s | %-10s | %s", c.Bullet, c.Rule, c.ResultComment)
 }
 
+func (c *Check) SimpleRawString() string {
+	return fmt.Sprintf(" %2s | %-10s | %s", simplifyBullet(c.Bullet), c.Rule, c.ResultComment)
+}
+
 func (c *Check) String() string {
 	var res, comment string
 	switch {
