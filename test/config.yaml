@@ -12,7 +12,7 @@ irc:
   bot_name: mybot                 # the actual user will be the tracker user
   gatekeeper: Bee                 # drone
 
-varroa:
+tracker:
   site : blue
   token: mytoken
   port: 8080
@@ -24,3 +24,6 @@ varroa:
   excluded_tags:
     - tag1
     - tag2
+  whitelisted_users:
+    - niceguy:2
+    - veryniceperson:-1

@@ -85,17 +85,19 @@ func (ci *ConfigIrc) String() string {
 	return txt
 }
 
-type ConfigVarroa struct {
-	Site                 string   `yaml:"site"`
-	Token                string   `yaml:"token"`
-	Port                 int      `yaml:"port"`
-	APIKey               string   `yaml:"api_key"`
-	URL                  string   `yaml:"tracker_url"`
-	BlacklistedUploaders []string `yaml:"blacklisted_uploaders"`
-	ExcludedTags         []string `yaml:"excluded_tags"`
+type ConfigTracker struct {
+	Site                 string         `yaml:"site"`
+	Token                string         `yaml:"token"`
+	Port                 int            `yaml:"port"`
+	APIKey               string         `yaml:"api_key"`
+	URL                  string         `yaml:"tracker_url"`
+	BlacklistedUploaders []string       `yaml:"blacklisted_uploaders"`
+	ExcludedTags         []string       `yaml:"excluded_tags"`
+	Users                []string       `yaml:"whitelisted_users"`
+	WhitelistedUsers     map[string]int `yaml:"-"`
 }
 
-func (cv *ConfigVarroa) check() error {
+func (cv *ConfigTracker) check() error {
 	if cv.Site != "" && cv.Token == "" {
 		return errors.New("missing token")
 	}
@@ -108,11 +110,24 @@ func (cv *ConfigVarroa) check() error {
 
 	// TODO more checks
 
+	// parsing the whitelisted users configuration
+	cv.WhitelistedUsers = make(map[string]int)
+	for _, u := range cv.Users {
+		parts := strings.Split(u, ":")
+		if len(parts) == 2 {
+			number, err := strconv.Atoi(parts[1])
+			if err != nil {
+				return err
+			}
+			cv.WhitelistedUsers[parts[0]] = number
+		}
+	}
+
 	return nil
 }
 
-func (cv *ConfigVarroa) String() string {
-	txt := "Varroa configuration:\n"
+func (cv *ConfigTracker) String() string {
+	txt := "Tracker configuration:\n"
 	txt += "\tSite: " + cv.Site + "\n"
 	txt += "\tToken: " + cv.Token + "\n"
 	txt += "\tPort: " + fmt.Sprintf("%d", cv.Port) + "\n"
@@ -120,5 +135,14 @@ func (cv *ConfigVarroa) String() string {
 	txt += "\tTracker API Key: " + cv.APIKey + "\n"
 	txt += "\tBlacklisted uploaders: " + strings.Join(cv.BlacklistedUploaders, ", ") + "\n"
 	txt += "\tBlacklisted tags: " + strings.Join(cv.ExcludedTags, ", ") + "\n"
+	var whitelisted []string
+	for k, v := range cv.WhitelistedUsers {
+		if v == -1 {
+			whitelisted = append(whitelisted, fmt.Sprintf("%s: infinite!", k))
+		} else {
+			whitelisted = append(whitelisted, fmt.Sprintf("%s: %d / day", k, v))
+		}
+	}
+	txt += "\tWhitelisted Users: " + strings.Join(whitelisted, ", ") + "\n"
 	return txt
 }

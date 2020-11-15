@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dgraph-io/badger/v2"
 	"github.com/pkg/errors"
 	"gitlab.com/catastrophic/assistance/logthis"
 	"gitlab.com/passelecasque/obstruction/tracker"
@@ -15,6 +16,7 @@ import (
 var config *Config
 var gazelle *tracker.Gazelle
 var httpClient *http.Client
+var db *badger.DB
 var onceConfig sync.Once
 
 const (
@@ -24,11 +26,11 @@ const (
 )
 
 type Config struct {
-	General          *ConfigGeneral
-	IRC              *ConfigIrc
-	Varroa           *ConfigVarroa
-	IrcConfigured    bool
-	VarroaConfigured bool
+	General           *ConfigGeneral
+	IRC               *ConfigIrc
+	Tracker           *ConfigTracker
+	IrcConfigured     bool
+	TrackerConfigured bool
 }
 
 func NewConfig(path string) (*Config, error) {
@@ -44,7 +46,7 @@ func NewConfig(path string) (*Config, error) {
 		config = newConf
 
 		// launching tracker
-		gazelle, newConfigErr = tracker.NewGazelle(config.Varroa.Site, config.Varroa.URL, "", "", "", "", config.Varroa.APIKey, userAgent())
+		gazelle, newConfigErr = tracker.NewGazelle(config.Tracker.Site, config.Tracker.URL, "", "", "", "", config.Tracker.APIKey, userAgent())
 		if newConfigErr != nil {
 			return
 		}
@@ -53,6 +55,9 @@ func NewConfig(path string) (*Config, error) {
 
 		// creating http client
 		httpClient = &http.Client{Timeout: time.Second * 10}
+
+		// opening db
+		db, newConfigErr = badger.Open(badger.DefaultOptions(dbFile))
 		return
 	})
 	return config, newConfigErr
@@ -62,6 +67,9 @@ func (c *Config) String() string {
 	txt := c.General.String() + "\n"
 	if c.IrcConfigured {
 		txt += c.IRC.String() + "\n"
+	}
+	if c.TrackerConfigured {
+		txt += c.Tracker.String() + "\n"
 	}
 	return txt
 }
@@ -101,11 +109,11 @@ func (c *Config) check() error {
 		}
 		c.IrcConfigured = true
 	}
-	if c.Varroa != nil {
-		if err := c.Varroa.check(); err != nil {
-			return errors.Wrap(err, "Error reading Varroa configuration")
+	if c.Tracker != nil {
+		if err := c.Tracker.check(); err != nil {
+			return errors.Wrap(err, "Error reading Tracker configuration")
 		}
-		c.VarroaConfigured = true
+		c.TrackerConfigured = true
 	}
 	return nil
 }
