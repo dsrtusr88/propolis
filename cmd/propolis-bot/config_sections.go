@@ -89,6 +89,7 @@ type ConfigTracker struct {
 	Site                 string         `yaml:"site"`
 	Token                string         `yaml:"token"`
 	Port                 int            `yaml:"port"`
+	SessionCookie        string         `yaml:"session_cookie"`
 	APIKey               string         `yaml:"api_key"`
 	URL                  string         `yaml:"tracker_url"`
 	BlacklistedUploaders []string       `yaml:"blacklisted_uploaders"`
@@ -106,6 +107,9 @@ func (cv *ConfigTracker) check() error {
 	}
 	if cv.Site != "" && cv.Port == 0 {
 		return errors.New("missing port number")
+	}
+	if cv.SessionCookie == "" || cv.APIKey == "" {
+		return errors.New("both an API key and a session cookie are required")
 	}
 
 	// TODO more checks
@@ -133,6 +137,7 @@ func (cv *ConfigTracker) String() string {
 	txt += "\tPort: " + fmt.Sprintf("%d", cv.Port) + "\n"
 	txt += "\tTracker URL: " + cv.URL + "\n"
 	txt += "\tTracker API Key: " + cv.APIKey + "\n"
+	txt += "\tTracker Session Cookie: " + cv.SessionCookie + "\n"
 	txt += "\tBlacklisted uploaders: " + strings.Join(cv.BlacklistedUploaders, ", ") + "\n"
 	txt += "\tBlacklisted tags: " + strings.Join(cv.ExcludedTags, ", ") + "\n"
 	var whitelisted []string

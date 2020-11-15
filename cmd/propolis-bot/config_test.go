@@ -38,6 +38,7 @@ func TestConfig(t *testing.T) {
 	check.Equal("mytoken", c.Tracker.Token)
 	check.Equal("https://blue.it", c.Tracker.URL)
 	check.Equal("apkikey", c.Tracker.APIKey)
+	check.Equal("cookie", c.Tracker.SessionCookie)
 	check.Equal(8080, c.Tracker.Port)
 	check.Equal([]string{"thisguy", "thisotherguy"}, c.Tracker.BlacklistedUploaders)
 	check.Equal([]string{"tag1", "tag2"}, c.Tracker.ExcludedTags)

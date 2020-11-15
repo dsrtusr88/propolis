@@ -17,6 +17,7 @@ tracker:
   token: mytoken
   port: 8080
   api_key: apkikey
+  session_cookie: cookie
   tracker_url: https://blue.it
   blacklisted_uploaders:
     - thisguy

@@ -46,7 +46,7 @@ func NewConfig(path string) (*Config, error) {
 		config = newConf
 
 		// launching tracker
-		gazelle, newConfigErr = tracker.NewGazelle(config.Tracker.Site, config.Tracker.URL, "", "", "", "", config.Tracker.APIKey, userAgent())
+		gazelle, newConfigErr = tracker.NewGazelle(config.Tracker.Site, config.Tracker.URL, "", "", "session", config.Tracker.SessionCookie, config.Tracker.APIKey, userAgent())
 		if newConfigErr != nil {
 			return
 		}
