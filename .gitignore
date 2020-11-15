@@ -2,7 +2,7 @@
 archives/
 test/
 img/
-config*.yaml
+config*.yaml*
 *.txt
 *.png
 log
