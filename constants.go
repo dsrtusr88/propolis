@@ -116,6 +116,6 @@ var (
 	nonFlacMusicExtensions = []string{".ac3", ".dts", ".m4a", ".m4b", ".mp3", ".mp4", ".aac", ".alac", ".ogg", ".opus"}
 	nonMusicExtensions     = []string{".accurip", ".azw3", ".chm", ".cue", ".djv", ".djvu", ".doc", ".dmg", ".epub", ".ffp", ".gif", ".htm", ".html", ".jpeg", ".jpg", ".lit", ".log", ".m3u", ".m3u8", ".md5", ".mobi", ".nfo", ".pdf", ".pls", ".png", ".rtf", ".sfv", ".txt"}
 
-	forbiddenCharacters        = []string{":", "*", `\`, "?", `"`, `<`, `>`, "|", "$", "`"}
+	forbiddenCharacters        = []string{":", "*", `\`, "?", `"`, `<`, `>`, "|", "`"}
 	forbiddenLeadingCharacters = []string{" ", "."}
 )
