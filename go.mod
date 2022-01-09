@@ -7,7 +7,7 @@ require (
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.6.1
-	gitlab.com/catastrophic/assistance v0.40.1
+	gitlab.com/catastrophic/assistance v0.40.2
 )
 
 // replace gitlab.com/catastrophic/assistance => ../../catastrophic/assistance
