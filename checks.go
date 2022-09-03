@@ -235,7 +235,7 @@ func (p *Propolis) CheckFolderName() {
 	if len(cleanLogsAndCues) != 0 {
 		p.ConditionCheck(LevelWarning, "2.3.2", OKCDInFoldername, KOCDInFoldername, strings.Contains(folderName, "cd"))
 	} else {
-		p.ConditionCheck(LevelWarning, "2.3.2", OKWEBInFoldername, KOWEBInFoldername, strings.Contains(folderName, "web"))
+		p.ConditionCheck(LevelWarning, "2.3.2", OKWEBInFoldername, KOWEBInFoldername, strings.Contains(folderName, "web") || strings.Contains(folderName, "vinyl"))
 	}
 }
 
