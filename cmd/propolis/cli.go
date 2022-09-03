@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/docopt/docopt-go"
@@ -66,6 +67,11 @@ func (m *propolisArgs) parseCLI(osArgs []string) error {
 	m.path = filepath.Clean(args["<PATH>"].(string))
 	if !fs.DirExists(m.path) {
 		return errors.New("target path " + m.path + " not found")
+	}
+	// if given current directory, going back up to find the current directory name
+	if m.path == "." {
+		cwd, _ := os.Getwd()
+		m.path = filepath.Join("..", filepath.Base(cwd))
 	}
 	return nil
 }
