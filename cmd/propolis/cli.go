@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/docopt/docopt-go"
 	"github.com/pkg/errors"
@@ -62,7 +63,7 @@ func (m *propolisArgs) parseCLI(osArgs []string) error {
 	if m.jsonOutput {
 		m.problemsOnly = false
 	}
-	m.path = args["<PATH>"].(string)
+	m.path = filepath.Clean(args["<PATH>"].(string))
 	if !fs.DirExists(m.path) {
 		return errors.New("target path " + m.path + " not found")
 	}
