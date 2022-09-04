@@ -50,7 +50,7 @@ type propolisArgs struct {
 
 func (m *propolisArgs) parseCLI(osArgs []string) error {
 	// parse arguments and options
-	args, err := docopt.ParseArgs(usage, osArgs, fmt.Sprintf(fullVersion, fullName, Version))
+	args, err := docopt.ParseArgs(fmt.Sprintf(usage, Version), osArgs, fmt.Sprintf(fullVersion, fullName, Version))
 	if err != nil {
 		return errors.Wrap(err, "incorrect arguments")
 	}
