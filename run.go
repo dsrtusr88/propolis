@@ -12,7 +12,7 @@ var (
 	log = &Log{}
 )
 
-func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput, stdOutput bool, version string) (*Propolis, string, error) {
+func Run(path, metadataRoot string, disableSpecs, problemsOnly, snatched, jsonOutput, stdOutput bool, version string) (*Propolis, string, error) {
 	logthis.Info(ui.YellowBold(ArrowHeader+"Analysing "+path), logthis.NORMAL)
 
 	// setting output config
@@ -20,6 +20,9 @@ func Run(path string, disableSpecs, problemsOnly, snatched, jsonOutput, stdOutpu
 
 	// by default, metadata (spectrograms, etc), will be put in a side folder.
 	metadataDir := path + " (Metadata)"
+	if metadataRoot != "" {
+		metadataDir = filepath.Join(metadataRoot, filepath.Base(metadataDir))
+	}
 	if snatched {
 		metadataDir = filepath.Join(path, "Metadata")
 	}

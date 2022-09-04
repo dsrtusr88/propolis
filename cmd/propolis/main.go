@@ -25,7 +25,7 @@ func main() {
 		return
 	}
 
-	results, _, err := propolis.Run(cli.path, cli.disableSpecs, cli.problemsOnly, cli.snatched, cli.jsonOutput, true, Version)
+	results, _, err := propolis.Run(cli.path, cli.metadataRoot, cli.disableSpecs, cli.problemsOnly, cli.snatched, cli.jsonOutput, true, Version)
 	if err != nil {
 		logthis.Error(err, logthis.NORMAL)
 	}

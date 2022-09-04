@@ -21,15 +21,16 @@ Description:
     Detect trumpable releases.
 	
 Usage:
-    propolis [--no-specs] [--only-problems] [--snatched] [--json] <PATH>
+    propolis [--metadata-root=<METADATA_PATH>] [--no-specs] [--only-problems] [--snatched] [--json] <PATH>
 
 Options:
-    --snatched       Snatched mode: allow varroa metadata files, spec generated in <PATH>
-    --no-specs       Disable spectrograms generation.
-    --only-problems  Only show problems (warnings & errors).
-    --json           Toggles JSON output. Sets --only-problems to false.
-    -h, --help       Show this screen.
-    --version        Show version.
+    --snatched                       Snatched mode: allow varroa metadata files, spec generated in <PATH>
+    --no-specs                       Disable spectrograms generation.
+    --only-problems                  Only show problems (warnings & errors).
+    --json                           Toggles JSON output. Sets --only-problems to false.
+    --metadata-root=<METADATA_PATH>  Save propolis metadata inside this folder.
+    -h, --help                       Show this screen.
+    --version                        Show version.
 `
 	fullName    = "propolis"
 	fullVersion = "%s -- %s"
@@ -44,11 +45,12 @@ type propolisArgs struct {
 	snatched     bool
 	jsonOutput   bool
 	path         string
+	metadataRoot string
 }
 
 func (m *propolisArgs) parseCLI(osArgs []string) error {
 	// parse arguments and options
-	args, err := docopt.Parse(fmt.Sprintf(usage, Version), osArgs, true, fmt.Sprintf(fullVersion, fullName, Version), false, false)
+	args, err := docopt.ParseArgs(usage, osArgs, fmt.Sprintf(fullVersion, fullName, Version))
 	if err != nil {
 		return errors.Wrap(err, "incorrect arguments")
 	}
@@ -72,6 +74,18 @@ func (m *propolisArgs) parseCLI(osArgs []string) error {
 	if m.path == "." {
 		cwd, _ := os.Getwd()
 		m.path = filepath.Join("..", filepath.Base(cwd))
+	}
+
+	metadataRoot, err := args.String("--metadata-root")
+	if err == nil {
+		m.metadataRoot = filepath.Clean(metadataRoot)
+		if m.metadataRoot != "" && !fs.DirExists(m.metadataRoot) {
+			return errors.New("target metadata root path " + m.metadataRoot + " not found")
+		}
+	}
+
+	if m.snatched && m.metadataRoot != "" {
+		return errors.New("--snatched implies metadata will be saved inside the release folder, not compatible with --metadata-root")
 	}
 	return nil
 }
