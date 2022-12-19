@@ -94,6 +94,14 @@ func (p *Propolis) CheckOrganization(snatched bool) {
 			p.ConditionCheck(LevelCritical, "2.3.12", "", ArrowHeader+fmt.Sprintf(KOTooLong, utf8.RuneCountInString(f), f), false)
 		}
 	}
+	// checking for non-standard spaces
+	filesWithNonStandardSpaces := fs.GetPathsWithNonStandardSpaces(p.release.Path)
+	p.ConditionCheck(LevelWarning, internalRule, OKNonStandardSpaces, KONonStandardSpaces, len(filesWithNonStandardSpaces) == 0)
+	if len(filesWithNonStandardSpaces) != 0 {
+		for _, f := range filesWithNonStandardSpaces {
+			p.ConditionCheck(LevelWarning, internalRule, "", ArrowHeader+fmt.Sprintf(KOIrregularSpaces, f), false)
+		}
+	}
 	// checking for only allowed extensions are used
 	forbidden := fs.GetForbiddenFilesByExt(p.release.Path, allowedExtensions)
 	if snatched {
