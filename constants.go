@@ -75,6 +75,8 @@ const (
 	KOConsistentAlbumArtist   = "Artist/Album artist tags differ from file to file"
 	OKCombinedTrackNumber     = "Track number for the first track is not combined with track total."
 	KOCombinedTrackNumber     = "Track number for the first track is combined with track total."
+	OKNotMissingFiles         = "All files are present"
+	KOMissingFiles            = "Checking for missing files"
 	OKValidCharacters         = "Tracks filenames do not appear to contain problematic characters."
 	KOValidCharacters         = "At least one track filename or folder contains problematic characters."
 	InvalidCharacters         = "In files and folders: %s"

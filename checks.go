@@ -140,6 +140,8 @@ func (p *Propolis) CheckTags() {
 	p.ErrorCheck(LevelWarning, internalRule, OKConsistentAlbumArtist, KOConsistentAlbumArtist, p.release.CheckAlbumArtist(), AppendError)
 	// TODO check combined tags
 	p.ConditionCheck(LevelWarning, "2.3.18.3", OKCombinedTrackNumber, KOCombinedTrackNumber, p.release.Flacs[0].CheckNotCombinedTrackNumber())
+	// checking for missing files
+	p.ErrorCheck(LevelCritical, "2.1.19", OKNotMissingFiles, KOMissingFiles, p.release.CheckForMissingTracks(), AppendError)
 }
 
 func (p *Propolis) CheckFilenames(snatched bool) {
