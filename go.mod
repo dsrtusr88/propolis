@@ -6,7 +6,7 @@ require (
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.6.1
-	gitlab.com/catastrophic/assistance v0.42.0
+	gitlab.com/catastrophic/assistance v0.43.1
 )
 
 require (
@@ -33,6 +33,3 @@ require (
 	golang.org/x/text v0.3.2 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )
-
-// replace gitlab.com/catastrophic/assistance => ../../catastrophic/assistance
-// replace gitlab.com/passelecasque/obstruction => ../obstruction

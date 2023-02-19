@@ -77,7 +77,7 @@ func (p *Propolis) CheckMusicFiles() {
 	// checking for MQA encoding
 	if len(p.release.Flacs) != 0 {
 		p.ConditionCheck(LevelCritical, "upload#DNU", OKNoMQAMetadata, KONoMQAMetadata, !p.release.Flacs[0].CheckForMQAMetadata())
-		isMQA, _ := p.release.Flacs[0].CheckForMQASyncword()
+		isMQA, _, _ := p.release.Flacs[0].CheckForMQASyncword()
 		p.ConditionCheck(LevelCritical, "upload#DNU", OKNoMQASyncword, KONoMQASyncword, !isMQA)
 	}
 }

@@ -84,8 +84,8 @@ github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/tj/go-spin v1.1.0 h1:lhdWZsvImxvZ3q1C5OIB7d72DuOwP4O2NdBg9PyzNds=
 github.com/tj/go-spin v1.1.0/go.mod h1:Mg1mzmePZm4dva8Qz60H2lHwmJ2loum4VIrLgVnKwh4=
-gitlab.com/catastrophic/assistance v0.42.0 h1:FMnnwTRq9SC9J4jF5xml9r6/YejQjRgh0E1XkFGVYwo=
-gitlab.com/catastrophic/assistance v0.42.0/go.mod h1:E4pZe+bXoyLwpYtaIg7ahpIi5oqdkacdMBNSLbJHWUg=
+gitlab.com/catastrophic/assistance v0.43.1 h1:BRb+Z7BKglCYFnr0HnQ9hBc/06eYPHQ0QENbTEiKBbM=
+gitlab.com/catastrophic/assistance v0.43.1/go.mod h1:E4pZe+bXoyLwpYtaIg7ahpIi5oqdkacdMBNSLbJHWUg=
 gitlab.com/catastrophic/gotabulate v0.0.0-20190228104527-d3d77fbbb3a1 h1:nKQdLjYLARydXRsNOfHxTB0TaOZdKpp3a/P6dc3ySCE=
 gitlab.com/catastrophic/gotabulate v0.0.0-20190228104527-d3d77fbbb3a1/go.mod h1:poSJSlChz9NabfWFYQ1Dl+TBXn/q/wvs3OpQNaDIreU=
 golang.org/x/crypto v0.0.0-20170930174604-9419663f5a44/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
