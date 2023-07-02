@@ -74,11 +74,15 @@ func (p *Propolis) CheckMusicFiles() {
 			p.ErrorCheck(LevelCritical, "2.2.10.10", BlankBecauseImpossible, ArrowHeader+OtherError, err, AppendError)
 		}
 	}
-	// checking for MQA encoding
+
 	if len(p.release.Flacs) != 0 {
+		// checking for MQA encoding
 		p.ConditionCheck(LevelCritical, "upload#DNU", OKNoMQAMetadata, KONoMQAMetadata, !p.release.Flacs[0].CheckForMQAMetadata())
 		isMQA, _, _ := p.release.Flacs[0].CheckForMQASyncword()
 		p.ConditionCheck(LevelCritical, "upload#DNU", OKNoMQASyncword, KONoMQASyncword, !isMQA)
+		// checking for padded bits
+		isPadded, trueBitDepth, _ := p.release.Flacs[0].CheckForPaddedBits()
+		p.ConditionCheck(LevelCritical, "upload#DNU", OKNoPaddedBits, fmt.Sprintf(KOPaddedBits, trueBitDepth), !isPadded)
 	}
 }
 
