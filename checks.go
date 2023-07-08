@@ -82,7 +82,7 @@ func (p *Propolis) CheckMusicFiles() {
 		p.ConditionCheck(LevelCritical, "upload#DNU", OKNoMQASyncword, KONoMQASyncword, !isMQA)
 		// checking for padded bits
 		isPadded, trueBitDepth, _ := p.release.Flacs[0].CheckForPaddedBits()
-		p.ConditionCheck(LevelCritical, "upload#DNU", OKNoPaddedBits, fmt.Sprintf(KOPaddedBits, trueBitDepth), !isPadded)
+		p.ConditionCheck(LevelCritical, internalRule, OKNoPaddedBits, fmt.Sprintf(KOPaddedBits, trueBitDepth), !isPadded)
 	}
 }
 
