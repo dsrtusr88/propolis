@@ -49,7 +49,7 @@ const (
 	OKNoMQASyncword           = "The first track does not contain MQA syncwords."
 	KONoMQASyncword           = "The first track contains MQA syncwords."
 	OKNoPaddedBits            = "The first track does not contain padded bits."
-	KOPaddedBits              = "The first track contains padded bits and actually has a %d bit depth."
+	KOPaddedBits              = "The first track contains padded bits and actually has a %d bit depth. The release might be trumpable."
 	OKMaxCharacterLength      = "Maximum character length is less than 180 characters."
 	KOMaxCharacterLength      = "Maximum character length exceeds 180 characters."
 	KOTooLong                 = "Too long (%d chars): %s"
