@@ -12,7 +12,7 @@ var (
 	log = &Log{}
 )
 
-func Run(path, metadataRoot string, disableSpecs, problemsOnly, snatched, jsonOutput, stdOutput bool, version string) (*Propolis, string, error) {
+func Run(path, metadataRoot string, disableSpecs, disableCombinedSpecs, problemsOnly, snatched, jsonOutput, stdOutput bool, version string) (*Propolis, string, error) {
 	logthis.Info(ui.YellowBold(ArrowHeader+"Analysing "+path), logthis.NORMAL)
 
 	// setting output config
@@ -57,7 +57,7 @@ func Run(path, metadataRoot string, disableSpecs, problemsOnly, snatched, jsonOu
 
 		if !disableSpecs {
 			logthis.Info(titleHeader+ui.BlueBoldUnderlined("Generating spectrograms"), logthis.NORMAL)
-			overviewFile, err = GenerateSpectrograms(release, stdOutput && !jsonOutput)
+			overviewFile, err = GenerateSpectrograms(release, !disableCombinedSpecs, stdOutput && !jsonOutput)
 			if err != nil {
 				logthis.Error(err, logthis.NORMAL)
 			} else {

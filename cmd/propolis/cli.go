@@ -21,11 +21,12 @@ Description:
     Detect trumpable releases.
 	
 Usage:
-    propolis [--metadata-root=<METADATA_PATH>] [--no-specs] [--only-problems] [--snatched] [--json] <PATH>
+    propolis [--metadata-root=<METADATA_PATH>] [--no-specs] [--no-overview] [--only-problems] [--snatched] [--json] <PATH>
 
 Options:
     --snatched                       Snatched mode: allow varroa metadata files, spec generated in <PATH>
     --no-specs                       Disable spectrograms generation.
+    --no-overview                    Disable spectrograms overview.
     --only-problems                  Only show problems (warnings & errors).
     --json                           Toggles JSON output. Sets --only-problems to false.
     --metadata-root=<METADATA_PATH>  Save propolis metadata inside this folder.
@@ -39,13 +40,14 @@ Options:
 var Version = "dev"
 
 type propolisArgs struct {
-	builtin      bool
-	disableSpecs bool
-	problemsOnly bool
-	snatched     bool
-	jsonOutput   bool
-	path         string
-	metadataRoot string
+	builtin              bool
+	disableSpecs         bool
+	disableCombinedSpecs bool
+	problemsOnly         bool
+	snatched             bool
+	jsonOutput           bool
+	path                 string
+	metadataRoot         string
 }
 
 func (m *propolisArgs) parseCLI(osArgs []string) error {
@@ -61,6 +63,7 @@ func (m *propolisArgs) parseCLI(osArgs []string) error {
 	}
 	m.snatched = args["--snatched"].(bool)
 	m.disableSpecs = args["--no-specs"].(bool)
+	m.disableCombinedSpecs = args["--no-overview"].(bool)
 	m.problemsOnly = args["--only-problems"].(bool)
 	m.jsonOutput = args["--json"].(bool)
 	if m.jsonOutput {

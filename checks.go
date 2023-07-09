@@ -266,12 +266,15 @@ func (p *Propolis) CheckExtraFiles() {
 	p.ConditionCheck(LevelWarning, internalRule, fmt.Sprintf(OKExtraFilesRatio, strconv.FormatFloat(ratio, 'f', 2, 32)), fmt.Sprintf(KOExtraFilesRatio, strconv.FormatFloat(ratio, 'f', 2, 32)), ratio < 10)
 }
 
-func GenerateSpectrograms(release *music.Release, verbose bool) (string, error) {
+func GenerateSpectrograms(release *music.Release, generateCombined, verbose bool) (string, error) {
 	// generating full spectrograms
 	_, err := release.GenerateSpectrograms("propolis", verbose)
 	if err != nil {
 		return "", err
 	}
-	// combination of 10s slices from each song
-	return release.GenerateCombinedSpectrogram(verbose)
+	if generateCombined {
+		// combination of 10s slices from each song
+		return release.GenerateCombinedSpectrogram(verbose)
+	}
+	return "", nil
 }

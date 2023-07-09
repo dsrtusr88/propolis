@@ -5,6 +5,7 @@ import (
 	"syscall"
 
 	"gitlab.com/catastrophic/assistance/logthis"
+
 	"gitlab.com/passelecasque/propolis"
 )
 
@@ -25,7 +26,7 @@ func main() {
 		return
 	}
 
-	results, _, err := propolis.Run(cli.path, cli.metadataRoot, cli.disableSpecs, cli.problemsOnly, cli.snatched, cli.jsonOutput, true, Version)
+	results, _, err := propolis.Run(cli.path, cli.metadataRoot, cli.disableSpecs, cli.disableCombinedSpecs, cli.problemsOnly, cli.snatched, cli.jsonOutput, true, Version)
 	if err != nil {
 		logthis.Error(err, logthis.NORMAL)
 	}
