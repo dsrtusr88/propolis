@@ -19,16 +19,16 @@ RUN go mod download
 # Copy rest of the source code
 COPY . ./
 
-RUN go build -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${REVISION} -X main.date=${BUILDTIME}" -o bin/redactedhook cmd/redactedhook/main.go
+RUN go build -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${REVISION} -X main.date=${BUILDTIME}" -o bin/propolis cmd/propolis/main.go
 
 # build runner
 FROM alpine:latest
 
-LABEL org.opencontainers.image.source = "https://github.com/s0up4200/redactedhook"
+LABEL org.opencontainers.image.source = "https://github.com/dsrtusr88/propolis"
 
-ENV HOME="/redactedhook" \
-    XDG_CONFIG_HOME="/redactedhook" \
-    XDG_DATA_HOME="/redactedhook"
+ENV HOME="/propolis" \
+    XDG_CONFIG_HOME="/propolis" \
+    XDG_DATA_HOME="/propolis"
 
 # Install runtime dependencies
 RUN apk --no-cache add ca-certificates curl tzdata jq
@@ -37,8 +37,8 @@ WORKDIR /redactedhook
 
 VOLUME /redactedhook
 
-COPY --from=app-builder /src/bin/redactedhook /usr/local/bin/
+COPY --from=app-builder /src/bin/propolis /usr/local/bin/
 
 EXPOSE 42135
 
-ENTRYPOINT ["/usr/local/bin/redactedhook", "--config", "config.toml"]
+ENTRYPOINT ["/usr/local/bin/propolis", "--config", "config.toml"]
