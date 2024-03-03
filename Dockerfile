@@ -33,9 +33,9 @@ ENV HOME="/propolis" \
 # Install runtime dependencies
 RUN apk --no-cache add ca-certificates curl tzdata jq
 
-WORKDIR /redactedhook
+WORKDIR /propolis
 
-VOLUME /redactedhook
+VOLUME /propolis
 
 COPY --from=app-builder /src/bin/propolis /usr/local/bin/
 
