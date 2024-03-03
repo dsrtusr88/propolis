@@ -5,8 +5,8 @@ ARG VERSION=dev
 ARG REVISION=dev
 ARG BUILDTIME
 
-# Install only necessary packages for the build
-RUN apk add --no-cache git tzdata
+# Install necessary packages for the build
+RUN apk add --no-cache git tzdata sox flac ffmpeg
 
 ENV SERVICE=redactedhook
 
@@ -24,14 +24,14 @@ RUN go build -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${REVISIO
 # build runner
 FROM alpine:latest
 
-LABEL org.opencontainers.image.source = "https://github.com/dsrtusr88/propolis"
+LABEL org.opencontainers.image.source="https://github.com/dsrtusr88/propolis"
 
 ENV HOME="/propolis" \
     XDG_CONFIG_HOME="/propolis" \
     XDG_DATA_HOME="/propolis"
 
 # Install runtime dependencies
-RUN apk --no-cache add ca-certificates curl tzdata jq
+RUN apk --no-cache add ca-certificates curl tzdata sox flac ffmpeg
 
 WORKDIR /propolis
 
