@@ -19,7 +19,8 @@ RUN go mod download
 # Copy rest of the source code
 COPY . ./
 
-RUN go build -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${REVISION} -X main.date=${BUILDTIME}" -o bin/propolis cmd/propolis/main.go
+#RUN go build -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${REVISION} -X main.date=${BUILDTIME}" -o bin/propolis cmd/propolis/main.go
+RUN go build -trimpath -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${REVISION} -X main.date=${BUILDTIME}" -o bin/propolis cmd/propolis/main.go
 
 # build runner
 FROM alpine:latest
